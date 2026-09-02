@@ -1029,7 +1029,7 @@ async function storageDelete(key){
   try { await window.storage.delete(key, false); return true; } catch(e){ return false; }
 }
 
-const LEVEL_UP_STREAK = 3;   // consecutive correct at current grade to level up
+const LEVEL_UP_STREAK = 5;   // consecutive correct at current grade to level up
 const LEVEL_DOWN_MISSES = 2; // consecutive incorrect at current grade to step back down
 
 function freshProgress(){
