@@ -270,6 +270,35 @@ input[type=text]:focus{border-color:var(--blue);}
 .spacer-24{height:24px;}
 .link-btn{background:none; border:none; color:var(--ink-soft); font-weight:800; text-decoration:underline; padding:4px;}
 .footer-note{text-align:center; color:var(--ink-soft); font-size:.8rem; margin-top:36px; font-weight:600;}
+
+@media (max-width:560px){
+  #app{padding:12px 12px 96px;}
+  .panel{padding:18px; border-radius:18px;}
+  .topbar{align-items:flex-start; gap:10px; margin-bottom:16px;}
+  .identity{min-width:0;}
+  .stat-pills{gap:5px;}
+  .pill{padding:6px 9px; font-size:.82rem;}
+  .nav-links{width:100%;}
+  .nav-links button{flex:1; min-width:0; padding-left:8px; padding-right:8px;}
+  .hero{padding:18px 4px 4px;}
+  .hero-emoji-row{gap:8px; font-size:2rem;}
+  .hero .sub{font-size:1rem;}
+  .node-grid{grid-template-columns:1fr; gap:12px;}
+  .skill-card{padding:14px; gap:11px;}
+  .skill-node{width:64px; height:64px;}
+  .skill-node .hole{inset:7px; font-size:1.45rem;}
+  .question-prompt{font-size:1.3rem; margin-bottom:20px;}
+  .choice-btn{padding:14px; font-size:1rem;}
+  .bottom-bar{padding:10px 12px calc(10px + env(safe-area-inset-bottom));}
+  .bottom-bar-inner{flex-direction:column; align-items:stretch; gap:8px;}
+  .bottom-feedback{align-items:flex-start; width:100%;}
+  .bottom-feedback .sub{overflow-wrap:anywhere;}
+  .bottom-bar .btn{width:100%;}
+  .complete-hero{padding:20px 4px;}
+  .complete-stats{gap:6px;}
+  .complete-stat{padding:12px 4px;}
+  .complete-stat .val{font-size:1.25rem;}
+}
 </style>
 </head>
 <body>
