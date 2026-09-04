@@ -106,8 +106,6 @@ button{font-family:var(--font-body); cursor:pointer;}
 .pill.pill-streak{color:#E0670C; border-color:#FFD8B3;}
 .pill.pill-hearts{color:var(--red-deep); border-color:#FFC9C9;}
 .pill .icon{font-size:1.05rem;}
-.nav-links{display:flex; gap:8px; flex-wrap:wrap;}
-.nav-links button{font-size:.78rem;}
 
 /* ---------- Avatar ---------- */
 .avatar{
@@ -115,7 +113,7 @@ button{font-family:var(--font-body); cursor:pointer;}
   position:relative; flex-shrink:0; border:3px solid #fff; box-shadow:0 0 0 2px var(--line);
 }
 .avatar .emoji{filter:drop-shadow(0 2px 0 rgba(0,0,0,0.08));}
-.avatar-accessory{position:absolute; font-size:.55em; top:-4%; right:-4%;}
+.avatar-accessory{position:absolute; top:-22%; left:50%; transform:translateX(-50%); line-height:1; filter:drop-shadow(0 2px 1px rgba(0,0,0,0.15)); pointer-events:none;}
 
 /* ---------- Screen fade ---------- */
 .screen{animation:fadeUp .3s ease both;}
@@ -193,6 +191,7 @@ input[type=text]:focus{border-color:var(--blue);}
 .quit-x{font-size:1.4rem; color:var(--ink-soft); background:none; border:none; padding:4px; line-height:1;}
 .lesson-progress-track{ flex:1; height:16px; border-radius:999px; background:var(--line); overflow:hidden; }
 .lesson-progress-fill{ height:100%; border-radius:999px; background:var(--green); transition:width .35s ease; }
+.progress-caption-sm{ font-size:.72rem; font-weight:800; color:var(--ink-soft); margin-top:4px; text-align:center; }
 .progress-track{ height:10px; border-radius:999px; background:var(--line); overflow:hidden; }
 .progress-fill{ height:100%; border-radius:999px; transition:width .4s ease; }
 .hearts-row{display:flex; gap:3px; font-size:1.15rem;}
@@ -261,7 +260,32 @@ input[type=text]:focus{border-color:var(--blue);}
 .badge-tile .b-icon{font-size:1.8rem;}
 .badge-tile .b-name{font-size:.76rem; font-weight:800; margin-top:6px; line-height:1.2;}
 
-/* ---------- Misc ---------- */
+/* ---------- Bottom tab bar (primary nav) ---------- */
+.tab-bar{
+  position:fixed; left:0; right:0; bottom:0; z-index:35;
+  background:var(--paper); border-top:2px solid var(--line);
+  display:flex; justify-content:space-around; gap:4px;
+  padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+}
+.tab-btn{
+  background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:2px;
+  color:var(--ink-soft); font-weight:800; font-size:.68rem; font-family:var(--font-body);
+  padding:6px 4px; border-radius:12px; flex:1; max-width:120px; transition:background .12s ease, color .12s ease;
+}
+.tab-btn .tab-icon{font-size:1.35rem; line-height:1;}
+.tab-btn.active{color:var(--green-deep); background:#EBFAE0;}
+
+/* ---------- Skill card caption ---------- */
+.skill-caption{font-size:.72rem; color:var(--ink-soft); font-weight:700; margin-top:4px;}
+
+/* ---------- Info banner ---------- */
+.info-banner{
+  display:flex; align-items:flex-start; gap:10px; background:#EAF6FF; border:2px solid #CDEBFF;
+  border-radius:16px; padding:14px 16px; margin:12px 0 4px; font-size:.88rem; font-weight:700; color:#0F5C82;
+}
+.info-banner .ii{font-size:1.2rem; flex-shrink:0;}
+
+
 .section-title{font-family:var(--font-display); font-weight:800; font-size:1.3rem; margin:26px 0 4px;}
 .muted{color:var(--ink-soft); font-weight:600;}
 .center{text-align:center;}
@@ -270,35 +294,6 @@ input[type=text]:focus{border-color:var(--blue);}
 .spacer-24{height:24px;}
 .link-btn{background:none; border:none; color:var(--ink-soft); font-weight:800; text-decoration:underline; padding:4px;}
 .footer-note{text-align:center; color:var(--ink-soft); font-size:.8rem; margin-top:36px; font-weight:600;}
-
-@media (max-width:560px){
-  #app{padding:12px 12px 96px;}
-  .panel{padding:18px; border-radius:18px;}
-  .topbar{align-items:flex-start; gap:10px; margin-bottom:16px;}
-  .identity{min-width:0;}
-  .stat-pills{gap:5px;}
-  .pill{padding:6px 9px; font-size:.82rem;}
-  .nav-links{width:100%;}
-  .nav-links button{flex:1; min-width:0; padding-left:8px; padding-right:8px;}
-  .hero{padding:18px 4px 4px;}
-  .hero-emoji-row{gap:8px; font-size:2rem;}
-  .hero .sub{font-size:1rem;}
-  .node-grid{grid-template-columns:1fr; gap:12px;}
-  .skill-card{padding:14px; gap:11px;}
-  .skill-node{width:64px; height:64px;}
-  .skill-node .hole{inset:7px; font-size:1.45rem;}
-  .question-prompt{font-size:1.3rem; margin-bottom:20px;}
-  .choice-btn{padding:14px; font-size:1rem;}
-  .bottom-bar{padding:10px 12px calc(10px + env(safe-area-inset-bottom));}
-  .bottom-bar-inner{flex-direction:column; align-items:stretch; gap:8px;}
-  .bottom-feedback{align-items:flex-start; width:100%;}
-  .bottom-feedback .sub{overflow-wrap:anywhere;}
-  .bottom-bar .btn{width:100%;}
-  .complete-hero{padding:20px 4px;}
-  .complete-stats{gap:6px;}
-  .complete-stat{padding:12px 4px;}
-  .complete-stat .val{font-size:1.25rem;}
-}
 </style>
 </head>
 <body>
@@ -1027,44 +1022,6 @@ const GRADES = [5,6,7,8,9];
 function strandByKey(k){ return STRANDS.find(s => s.key === k); }
 function gradeLabel(g){ return g === 9 ? 'Grade 9 · Challenge' : `Grade ${g}`; }
 
-const LESSON_TIPS = {
-  number: {
-    5:{title:'Break numbers into friendly parts',body:'For multiplication, split a number into tens and ones, then add the partial products.',example:'23 × 4 = (20 × 4) + (3 × 4) = 92'},
-    6:{title:'Use a number line and benchmarks',body:'Compare integers by their position, and find a percent by turning it into a fraction out of 100.',example:'25% of 80 = 1/4 of 80 = 20'},
-    7:{title:'Keep track of signs',body:'For integers, same signs make a positive product and different signs make a negative product.',example:'−3 × 4 = −12'},
-    8:{title:'Translate words into operations',body:'Identify the starting amount, the rate, and the change before calculating.',example:'20% off $50: $50 − (0.20 × $50) = $40'},
-    9:{title:'Do multi-step calculations in order',body:'Apply each operation to the result before it. Discounts happen before a tax added to the sale price.',example:'$100 × 0.80 × 1.05 = $84'},
-  },
-  algebra: {
-    5:{title:'Look for the change',body:'Compare neighbouring terms. A constant increase often gives the pattern rule.',example:'3, 7, 11, 15: add 4 each time'},
-    6:{title:'Undo operations to find x',body:'Use the inverse operation on both sides of an equation to keep it balanced.',example:'3x = 18 → x = 18 ÷ 3 = 6'},
-    7:{title:'Substitute carefully',body:'Replace the variable with its value, then follow the order of operations.',example:'y = 2x + 3, x = 4 → y = 8 + 3 = 11'},
-    8:{title:'Read a line from its parts',body:'In y = mx + b, m is the slope and b is the starting value where the line crosses the y-axis.',example:'y = 3x + 2 → slope = 3'},
-    9:{title:'Combine like terms',body:'Only terms with the same variable and exponent can be combined. Keep constants separate.',example:'4x + 2 + 3x − 1 = 7x + 1'},
-  },
-  spatial: {
-    5:{title:'Choose the matching formula',body:'Area measures the space inside a flat shape. Match the formula to the shape before substituting.',example:'Rectangle area = length × width'},
-    6:{title:'Use the dimensions that matter',body:'For a triangle, multiply base and height, then divide by 2. For a prism, multiply the base area by length.',example:'Triangle area = (base × height) ÷ 2'},
-    7:{title:'Scale every matching length',body:'A scale factor multiplies each corresponding length by the same amount.',example:'6 cm × scale factor 3 = 18 cm'},
-    8:{title:'Build from the theorem',body:'For a right triangle, the square of the hypotenuse equals the sum of the squares of the legs.',example:'3² + 4² = 5²'},
-    9:{title:'Split complex shapes into parts',body:'Find each simple area or volume, then combine the pieces while keeping units consistent.',example:'Total volume = box volume + cylinder volume'},
-  },
-  data: {
-    5:{title:'Describe a data set',body:'The mean is the total divided by the number of values, while the range is greatest minus least.',example:'Mean of 2, 4, 6 = 12 ÷ 3 = 4'},
-    6:{title:'Find the middle and the repeat',body:'Sort values to find the median. The mode is the value that appears most often.',example:'1, 2, 2, 5, 9 → median 2, mode 2'},
-    7:{title:'Multiply independent chances',body:'When independent events both need to happen, multiply their probabilities.',example:'1/2 × 1/3 = 1/6'},
-    8:{title:'Question how data is shown',body:'Check axes, labels, and weights. A visual scale or an uneven weighting can change the story.',example:'A vertical axis should usually begin at 0 for bar graphs'},
-    9:{title:'Check the sample and the weights',body:'A trustworthy conclusion needs a representative sample and calculations that respect each category’s weight.',example:'Weighted mean = sum of (value × weight) ÷ total weight'},
-  },
-  financial: {
-    5:{title:'Separate needs from wants',body:'A need is essential; a want is something enjoyable but optional. A budget helps you make room for both.',example:'Money left = money in − money spent'},
-    6:{title:'Compare unit prices',body:'Divide each package price by its quantity. The lower price per item is the better deal.',example:'$6 ÷ 3 items = $2 per item'},
-    7:{title:'Find the amount before the total',body:'A percentage is a fraction of the original amount. Calculate the percentage, then add or subtract it.',example:'20% of $50 = $10; sale price = $40'},
-    8:{title:'Watch what interest is based on',body:'Simple interest uses the original principal. Compound interest also earns interest on earlier interest.',example:'Compound growth: principal × (1 + rate)^time'},
-    9:{title:'Sequence money changes',body:'Apply a discount, tax, or growth rate to the current amount at each step, and round only at the end.',example:'Final price = original × (1 − discount) × (1 + tax)'},
-  },
-};
-
 // ===================================================================
 // AVATAR CONFIG
 // ===================================================================
@@ -1079,7 +1036,7 @@ const AVATAR_COLORS = [
   {name:'Sky', v:'linear-gradient(160deg,#A9C9FF,#5D8CF0)'},
   {name:'Lime', v:'linear-gradient(160deg,#D4EA8F,#96C93D)'},
 ];
-const AVATAR_ACCESSORIES = ['none','🎩','👑','🕶️','🎧','⭐','🌟','🔥','🫱'];
+const AVATAR_ACCESSORIES = ['none','🎩','👑','🕶️','🎧','⭐','🌟','🔥','🦋'];
 
 // ===================================================================
 // BADGE CONFIG — id, name, icon, description, check(progress) -> bool
@@ -1118,10 +1075,39 @@ async function storageDelete(key){
   try { await window.storage.delete(key, false); return true; } catch(e){ return false; }
 }
 
-const LEVEL_UP_STREAK = 10;   // consecutive correct at current grade to level up
+const LEVEL_UP_STREAK = 3;   // consecutive correct at current grade to level up
 const LEVEL_DOWN_MISSES = 2; // consecutive incorrect at current grade to step back down
-const LESSON_LENGTH = 10;     // questions per lesson
+const LESSON_LENGTH = 8;     // questions per lesson
 const HEARTS_MAX = 5;        // hearts per lesson
+
+// ===================================================================
+// QUEST CONFIG — ongoing challenges, separate from one-time badges
+// ===================================================================
+const QUESTS = [
+  { id:'warm_up', name:'Warm Up', icon:'🔥', desc:'Answer 5 questions in any world', target:5, xp:15, gems:3, progress:p => Math.min(p.totalAnswered, 5) },
+  { id:'sharp_shooter', name:'Sharp Shooter', icon:'🎯', desc:'Get a 5-question streak', target:5, xp:20, gems:5, progress:p => Math.min(p.bestStreak, 5) },
+  { id:'world_explorer', name:'World Explorer', icon:'🧭', desc:'Practise in 3 different worlds', target:3, xp:20, gems:5, progress:p => Math.min(STRANDS.filter(s => (p.strandAnswered[s.key]||0) > 0).length, 3) },
+  { id:'level_up_once', name:'Level Up', icon:'⬆️', desc:'Reach Grade 6 in any world', target:1, xp:25, gems:5, progress:p => STRANDS.some(s => p.strandGrade[s.key] >= 6) ? 1 : 0 },
+  { id:'half_century', name:'Half Century', icon:'💯', desc:'Answer 50 questions correctly', target:50, xp:40, gems:10, progress:p => Math.min(p.totalCorrect, 50) },
+  { id:'well_rounded', name:'Well Rounded', icon:'🌈', desc:'Reach Grade 6 in every world', target:5, xp:50, gems:15, progress:p => STRANDS.filter(s => p.strandGrade[s.key] >= 6).length },
+];
+
+// ===================================================================
+// BOTTOM TAB BAR
+// ===================================================================
+const TABS = [
+  { key:'map', label:'Learn', icon:'🗺️' },
+  { key:'quests', label:'Quests', icon:'🎯' },
+  { key:'dashboard', label:'Progress', icon:'📊' },
+  { key:'profile', label:'Profile', icon:'👤' },
+];
+function renderBottomTabs(active){
+  return `<nav class="tab-bar">
+    ${TABS.map(t => `<button class="tab-btn ${active===t.key?'active':''}" data-action="go-tab" data-screen="${t.key}">
+      <span class="tab-icon">${t.icon}</span><span class="tab-label">${t.label}</span>
+    </button>`).join('')}
+  </nav>`;
+}
 
 function freshProgress(){
   const strandGrade = {}, strandStreakUp = {}, strandStreakDown = {}, strandAnswered = {}, strandCorrect = {};
@@ -1130,7 +1116,7 @@ function freshProgress(){
     xp:0, coins:0, totalAnswered:0, totalCorrect:0,
     currentStreak:0, bestStreak:0,
     strandGrade, strandStreakUp, strandStreakDown, strandAnswered, strandCorrect,
-    badges:[], introduced:{}
+    badges:[], questsCompleted:[]
   };
 }
 
@@ -1138,11 +1124,12 @@ function freshProgress(){
 // APP STATE
 // ===================================================================
 const state = {
-  screen:'loading',       // loading | login | create | map | lesson-tip | quest | lesson-complete | dashboard
+  screen:'loading',       // loading | login | create | map | quest | lesson-complete | dashboard | quests | profile
   profiles:[],            // [{id, name, avatarBase, avatarColor, avatarAccessory}]
   profile:null,
   progress:null,
   draftAvatar:{ base:'🧑', colorIdx:0, accessory:'none', name:'' },
+  editingAvatar:false,    // true when avatar creator was opened to edit an existing profile
   currentQuestion:null,
   phase:'selecting',      // selecting | checked
   selectedChoice:null,
@@ -1157,10 +1144,11 @@ function render(){
   else if (state.screen === 'login') app.innerHTML = renderLogin();
   else if (state.screen === 'create') app.innerHTML = renderCreate();
   else if (state.screen === 'map') app.innerHTML = renderMap();
-  else if (state.screen === 'lesson-tip') app.innerHTML = renderLessonTip();
   else if (state.screen === 'quest') app.innerHTML = renderQuest();
   else if (state.screen === 'lesson-complete') app.innerHTML = renderLessonComplete();
   else if (state.screen === 'dashboard') app.innerHTML = renderDashboard();
+  else if (state.screen === 'quests') app.innerHTML = renderQuests();
+  else if (state.screen === 'profile') app.innerHTML = renderProfileScreen();
   attachHandlers();
 }
 
@@ -1182,7 +1170,7 @@ function avatarHtml(profileLike, size){
   const accessory = profileLike.avatarAccessory || profileLike.accessory || 'none';
   return `<div class="avatar" style="width:${size}px;height:${size}px;background:${bg};">
     <span class="emoji" style="font-size:${Math.round(size*0.55)}px;">${base}</span>
-    ${accessory !== 'none' ? `<span class="avatar-accessory" style="font-size:${Math.round(size*0.5)}px;">${accessory}</span>` : ''}
+    ${accessory !== 'none' ? `<span class="avatar-accessory" style="font-size:${Math.round(size*0.42)}px;">${accessory}</span>` : ''}
   </div>`;
 }
 
@@ -1266,10 +1254,11 @@ function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;',
 // ===================================================================
 function renderCreate(){
   const d = state.draftAvatar;
+  const editing = state.editingAvatar;
   return `<div class="screen">
     <div class="center" style="margin-bottom:20px;">
-      <h2>Build your avatar</h2>
-      <p class="muted">Pick a look and a name — you can change this later.</p>
+      <h2>${editing ? 'Edit your avatar' : 'Build your avatar'}</h2>
+      <p class="muted">${editing ? 'Change your look or name any time.' : 'Pick a look and a name — you can change this later.'}</p>
     </div>
     <div class="panel">
       <div class="creator-grid">
@@ -1300,8 +1289,8 @@ function renderCreate(){
       </div>
       <div class="spacer-16"></div>
       <div class="row-between">
-        ${state.profiles.length ? `<button class="link-btn" data-action="back-to-login">← Back</button>` : `<span></span>`}
-        <button class="btn btn-primary btn-lg" data-action="save-avatar">Start Adventure 🚀</button>
+        ${(editing || state.profiles.length) ? `<button class="link-btn" data-action="back-from-create">← Back</button>` : `<span></span>`}
+        <button class="btn btn-primary btn-lg" data-action="save-avatar">${editing ? 'Save Changes ✅' : 'Start Adventure 🚀'}</button>
       </div>
     </div>
   </div>`;
@@ -1310,7 +1299,7 @@ function renderCreate(){
 // ===================================================================
 // Shared: top bar (avatar / stats / nav)
 // ===================================================================
-function renderTopbar(activeNav){
+function renderTopbar(){
   const p = state.profile, pr = state.progress;
   return `<div class="topbar">
     <div class="identity">
@@ -1321,14 +1310,9 @@ function renderTopbar(activeNav){
       </div>
     </div>
     <div class="stat-pills">
-      <span class="pill pill-streak"><span class="icon">🔥</span> ${pr.currentStreak}</span>
-      <span class="pill pill-gems"><span class="icon">💎</span> ${pr.coins}</span>
-      <span class="pill pill-xp"><span class="icon">⚡</span> ${pr.xp}</span>
-    </div>
-    <div class="nav-links">
-      <button class="btn btn-outline btn-sm" data-action="go-map">🗺️ Map</button>
-      <button class="btn btn-outline btn-sm" data-action="go-dashboard">📊 Progress</button>
-      <button class="btn btn-outline btn-sm" data-action="switch-profile">👤 Switch</button>
+      <span class="pill pill-streak" title="Current streak — correct answers in a row right now">🔥 ${pr.currentStreak}</span>
+      <span class="pill pill-gems" title="Gems — earned from correct answers and level-ups, spend nothing yet, just for bragging rights">💎 ${pr.coins}</span>
+      <span class="pill pill-xp" title="XP — total experience points earned from practising">⚡ ${pr.xp}</span>
     </div>
   </div>`;
 }
@@ -1339,18 +1323,23 @@ function renderTopbar(activeNav){
 function renderMap(){
   const pr = state.progress;
   return `<div class="screen">
-    ${renderTopbar('map')}
+    ${renderTopbar()}
     <div class="map-wrap">
-      <div class="center" style="margin-bottom:22px;">
+      <div class="center" style="margin-bottom:8px;">
         <h2>Choose a world to practise</h2>
         <p class="muted">Each lesson has ${LESSON_LENGTH} questions and ${HEARTS_MAX} hearts. Answer well and you'll level up fast.</p>
       </div>
-      <div class="node-grid">
+      <div class="info-banner">
+        <span class="ii">💡</span>
+        <span>Tap a world below to start a lesson. Get ${LEVEL_UP_STREAK} answers right in a row to level up that world's grade — miss ${LEVEL_DOWN_MISSES} in a row and it steps back down so it never feels too hard or too easy.</span>
+      </div>
+      <div class="node-grid" style="margin-top:18px;">
         ${STRANDS.map(s => {
           const grade = pr.strandGrade[s.key];
           const segments = GRADES.length; // 5 segments, one per grade 5-9
           const filled = grade - 5; // 0..4 fully completed segments
-          const upFrac = pr.strandStreakUp[s.key] / LEVEL_UP_STREAK; // progress into current segment
+          const up = pr.strandStreakUp[s.key];
+          const upFrac = up / LEVEL_UP_STREAK; // progress into current segment
           const stops = [];
           for (let i = 0; i < segments; i++){
             const segStart = (i / segments) * 360, segEnd = ((i+1) / segments) * 360;
@@ -1360,7 +1349,8 @@ function renderMap(){
             stops.push(`#E5E5E5 ${segFillEnd}deg ${segEnd - 3}deg`, `#fff ${segEnd - 3}deg ${segEnd}deg`);
           }
           const ring = `conic-gradient(${stops.join(',')})`;
-          const maxed = grade >= 9 && pr.strandStreakUp[s.key] === 0 && filled === 4;
+          const maxed = grade >= 9 && up === 0 && filled === 4;
+          const caption = maxed ? 'Challenge mastered!' : `${up}/${LEVEL_UP_STREAK} correct in a row to level up`;
           return `
           <button class="skill-card" data-action="enter-strand" data-strand="${s.key}">
             <div class="skill-node">
@@ -1372,12 +1362,13 @@ function renderMap(){
               <div class="skill-name">${s.name}</div>
               <div class="skill-tagline">${s.tagline}</div>
               <span class="skill-grade-pill" style="background:${s.soft}; color:${s.deep};">${gradeLabel(grade)}</span>
+              <div class="skill-caption">${caption}</div>
             </div>
           </button>`;
         }).join('')}
       </div>
     </div>
-    <p class="footer-note">Get ${LEVEL_UP_STREAK} right in a row to level up a world · miss ${LEVEL_DOWN_MISSES} in a row and it eases back down to keep things just-right.</p>
+    ${renderBottomTabs('map')}
   </div>`;
 }
 
@@ -1397,8 +1388,11 @@ function renderQuest(){
   return `<div class="screen">
     <div class="quest-header">
       <button class="quit-x" data-action="quit-lesson" aria-label="Quit lesson">✕</button>
-      <div class="lesson-progress-track"><div class="lesson-progress-fill" style="width:${lessonPct}%;"></div></div>
-      <div class="hearts-row">${hearts}</div>
+      <div style="flex:1;">
+        <div class="lesson-progress-track"><div class="lesson-progress-fill" style="width:${lessonPct}%;"></div></div>
+        <div class="progress-caption-sm">Question ${Math.min(les.index+1, les.total)} of ${les.total}</div>
+      </div>
+      <div class="hearts-row" title="Hearts left — a wrong answer costs one heart">${hearts}</div>
     </div>
 
     <div class="question-card">
@@ -1439,33 +1433,6 @@ function renderQuest(){
   </div>`;
 }
 
-function renderLessonTip(){
-  const les = state.lesson;
-  const strand = strandByKey(les.strand);
-  const grade = state.progress.strandGrade[les.strand];
-  const tip = LESSON_TIPS[les.strand][grade];
-  return `<div class="screen">
-    ${renderTopbar()}
-    <div class="panel" style="max-width:680px; margin:42px auto 0;">
-      <div class="center">
-        <div style="font-size:3.5rem;">${strand.icon}</div>
-        <span class="strand-tag" style="background:${strand.color}; margin-top:14px;">${strand.name} · ${gradeLabel(grade)}</span>
-        <h2 style="margin-top:8px;">Quick coach tip</h2>
-        <p class="muted" style="margin-top:8px;">Here is the key idea for your first lesson in this level.</p>
-      </div>
-      <div class="card" style="margin-top:24px; background:${strand.soft}; border-color:${strand.color};">
-        <h3>${tip.title}</h3>
-        <p style="margin-top:8px; line-height:1.55;">${tip.body}</p>
-        <div style="margin-top:14px; font-family:var(--font-display); font-weight:800; font-size:1.1rem;">${tip.example}</div>
-      </div>
-      <div class="row-between" style="margin-top:24px;">
-        <button class="btn btn-outline" data-action="go-map">Back to Map</button>
-        <button class="btn btn-primary btn-lg" data-action="start-lesson">Start Lesson 🚀</button>
-      </div>
-    </div>
-  </div>`;
-}
-
 // ===================================================================
 // SCREEN: LESSON COMPLETE
 // ===================================================================
@@ -1501,7 +1468,7 @@ function renderDashboard(){
   const accuracy = pr.totalAnswered ? Math.round((pr.totalCorrect / pr.totalAnswered) * 100) : 0;
   const weakest = STRANDS.slice().sort((a,b) => pr.strandGrade[a.key] - pr.strandGrade[b.key])[0];
   return `<div class="screen">
-    ${renderTopbar('dashboard')}
+    ${renderTopbar()}
     <h2>Your Progress</h2>
     <p class="muted">A snapshot for you (or a parent/teacher) to see how things are going.</p>
 
@@ -1513,6 +1480,7 @@ function renderDashboard(){
     </div>
 
     <div class="section-title">By world</div>
+    <p class="muted" style="font-size:.85rem; margin-top:-2px;">The bar shows how far each world has come from Grade 5 to the Grade 9 challenge.</p>
     <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
       ${STRANDS.map(s => {
         const grade = pr.strandGrade[s.key];
@@ -1527,14 +1495,15 @@ function renderDashboard(){
             <div class="progress-track" style="margin:8px 0 4px;"><div class="progress-fill" style="width:${gpct}%; background:${s.color};"></div></div>
             <div class="muted" style="font-size:.76rem;">${answered} answered · ${acc}% correct</div>
           </div>
-          <button class="btn btn-sm" style="background:${s.color}; color:#fff;" data-action="enter-strand" data-strand="${s.key}">Practice</button>
+          <button class="btn btn-sm" style="background:${s.color}; color:#fff;" data-action="enter-strand" data-strand="${s.key}">Practise</button>
         </div>`;
       }).join('')}
     </div>
 
-    ${weakest ? `<div class="card" style="margin-top:18px; background:var(--sand-deep);"><strong>Suggested focus:</strong> ${weakest.name} could use a little more practice right now.</div>` : ''}
+    ${weakest ? `<div class="card" style="margin-top:18px; background:#FFF6DA;"><strong>Suggested focus:</strong> ${weakest.name} could use a little more practice right now.</div>` : ''}
 
     <div class="section-title">Badges</div>
+    <p class="muted" style="font-size:.85rem; margin-top:-2px;">One-time achievements — hover or tap one to see what it takes.</p>
     <div class="badge-grid">
       ${BADGES.map(b => {
         const earned = pr.badges.includes(b.id);
@@ -1544,12 +1513,65 @@ function renderDashboard(){
         </div>`;
       }).join('')}
     </div>
+    ${renderBottomTabs('dashboard')}
+  </div>`;
+}
 
-    <div class="spacer-24"></div>
-    <div class="row-between">
-      <button class="btn btn-outline" data-action="go-map">← Back to Map</button>
-      <button class="btn btn-outline" data-action="reset-progress" style="color:var(--warn);">Reset Progress</button>
+// ===================================================================
+// SCREEN: QUESTS — ongoing challenges (separate from one-time badges)
+// ===================================================================
+function renderQuests(){
+  const pr = state.progress;
+  return `<div class="screen">
+    ${renderTopbar()}
+    <h2>Quests</h2>
+    <p class="muted">Bonus challenges that reward extra XP and gems as you practise — no need to do anything special, just keep playing and watch these fill up.</p>
+    <div style="display:flex; flex-direction:column; gap:12px; margin-top:16px;">
+      ${QUESTS.map(q => {
+        const cur = q.progress(pr);
+        const done = pr.questsCompleted.includes(q.id);
+        const pct = Math.round((cur / q.target) * 100);
+        return `<div class="card" style="display:flex; align-items:center; gap:14px;">
+          <div style="width:46px;height:46px;border-radius:14px;background:${done ? '#D7FFB8' : '#F0F0F0'};display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">${done ? '✅' : q.icon}</div>
+          <div style="flex:1; min-width:0;">
+            <div class="row-between"><strong>${q.name}</strong><span class="muted" style="font-size:.78rem;">${Math.min(cur,q.target)}/${q.target}</span></div>
+            <div class="muted" style="font-size:.82rem; margin:2px 0 8px;">${q.desc}</div>
+            <div class="progress-track"><div class="progress-fill" style="width:${pct}%; background:${done ? 'var(--green)' : 'var(--blue)'};"></div></div>
+          </div>
+          <div class="pill pill-xp" style="flex-shrink:0;" title="Reward for finishing this quest">+${q.xp}⚡</div>
+        </div>`;
+      }).join('')}
     </div>
+    ${renderBottomTabs('quests')}
+  </div>`;
+}
+
+// ===================================================================
+// SCREEN: PROFILE
+// ===================================================================
+function renderProfileScreen(){
+  const p = state.profile, pr = state.progress;
+  return `<div class="screen">
+    <div class="center" style="padding:20px 0 6px;">
+      ${avatarHtml(p, 110)}
+      <h2 style="margin-top:14px;">${escapeHtml(p.name)}</h2>
+      <p class="muted">Overall: Grade ${overallGradeEstimate(pr)}</p>
+    </div>
+    <div class="dash-grid" style="grid-template-columns:repeat(3,1fr); margin-top:10px; max-width:420px; margin-left:auto; margin-right:auto;">
+      <div class="card center"><div style="font-size:1.3rem; font-family:var(--font-display); font-weight:800; color:var(--gold-deep);">${pr.xp}</div><div class="muted" style="font-size:.74rem;">XP</div></div>
+      <div class="card center"><div style="font-size:1.3rem; font-family:var(--font-display); font-weight:800; color:var(--blue-deep);">${pr.coins}</div><div class="muted" style="font-size:.74rem;">Gems</div></div>
+      <div class="card center"><div style="font-size:1.3rem; font-family:var(--font-display); font-weight:800; color:#E0670C;">${pr.bestStreak}</div><div class="muted" style="font-size:.74rem;">Best streak</div></div>
+    </div>
+
+    <div class="panel" style="max-width:420px; margin:24px auto 0;">
+      <button class="btn btn-outline btn-block" data-action="edit-avatar">✏️ Edit Avatar &amp; Name</button>
+      <div class="spacer-16"></div>
+      <button class="btn btn-outline btn-block" data-action="switch-profile">👤 Switch Profile</button>
+      <div class="spacer-16"></div>
+      <button class="btn btn-outline btn-block" data-action="reset-progress" style="color:var(--warn);">🗑️ Reset Progress</button>
+      <p class="muted" style="font-size:.78rem; text-align:center; margin-top:10px;">Resetting clears XP, gems, grade levels and badges for ${escapeHtml(p.name)}. This can't be undone.</p>
+    </div>
+    ${renderBottomTabs('profile')}
   </div>`;
 }
 
@@ -1583,7 +1605,16 @@ function pickColor(i){ captureAvatarName(); state.draftAvatar.colorIdx = i; rend
 function pickAccessory(v){ captureAvatarName(); state.draftAvatar.accessory = v; render(); refocusAvatarName(); }
 
 function newAdventurer(){
+  state.editingAvatar = false;
   state.draftAvatar = { base: pick(AVATAR_BASES), colorIdx: randInt(0, AVATAR_COLORS.length-1), accessory:'none', name:'' };
+  state.screen = 'create';
+  render();
+}
+
+function editAvatar(){
+  const p = state.profile;
+  state.editingAvatar = true;
+  state.draftAvatar = { base: p.avatarBase, colorIdx: p.avatarColorIdx, accessory: p.avatarAccessory, name: p.name };
   state.screen = 'create';
   render();
 }
@@ -1591,6 +1622,21 @@ function newAdventurer(){
 async function saveAvatar(){
   const nameInput = document.getElementById('avatar-name');
   const name = (nameInput ? nameInput.value : state.draftAvatar.name).trim() || 'Adventurer';
+
+  if (state.editingAvatar){
+    state.profile.name = name;
+    state.profile.avatarBase = state.draftAvatar.base;
+    state.profile.avatarColorIdx = state.draftAvatar.colorIdx;
+    state.profile.avatarAccessory = state.draftAvatar.accessory;
+    await saveProfile();
+    const idx = state.profiles.findIndex(p => p.id === state.profile.id);
+    if (idx !== -1) state.profiles[idx] = { ...state.profile, progress: state.progress };
+    state.editingAvatar = false;
+    state.screen = 'profile';
+    render();
+    return;
+  }
+
   const id = 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
   state.profile = {
     id, name,
@@ -1607,6 +1653,7 @@ async function saveAvatar(){
 }
 
 function backToLogin(){ state.screen = 'login'; render(); }
+function backFromCreate(){ state.screen = state.editingAvatar ? 'profile' : 'login'; state.editingAvatar = false; render(); }
 
 async function continueProfile(id){
   const found = state.profiles.find(p => p.id === id);
@@ -1618,8 +1665,17 @@ async function continueProfile(id){
 }
 
 function switchProfile(){
-  state.profile = null; state.progress = null;
+  state.profile = null; state.progress = null; state.editingAvatar = false;
   init();
+}
+
+function goQuests(){ state.screen = 'quests'; render(); }
+function goProfileTab(){ state.screen = 'profile'; render(); }
+function goTab(key){
+  if (key === 'map') goMap();
+  else if (key === 'quests') goQuests();
+  else if (key === 'dashboard') goDashboard();
+  else if (key === 'profile') goProfileTab();
 }
 
 // ===================================================================
@@ -1633,21 +1689,7 @@ function enterStrand(key){
   state.lesson = { strand:key, index:0, total:LESSON_LENGTH, hearts:HEARTS_MAX, correctCount:0, xpEarned:0, gemsEarned:0 };
   state.phase = 'selecting';
   state.selectedChoice = null;
-  const grade = state.progress.strandGrade[key];
-  const introKey = `${key}:${grade}`;
-  if (!state.progress.introduced) state.progress.introduced = {};
-  if (!state.progress.introduced[introKey]){
-    state.progress.introduced[introKey] = true;
-    saveProgress();
-    state.screen = 'lesson-tip';
-    render();
-    return;
-  }
-  startLesson();
-}
-
-function startLesson(){
-  drawQuestion(state.lesson.strand);
+  drawQuestion(key);
   state.screen = 'quest';
   render();
 }
@@ -1707,6 +1749,14 @@ async function checkAnswer(){
   const newlyEarned = BADGES.filter(b => !pr.badges.includes(b.id) && b.check(pr));
   newlyEarned.forEach(b => { pr.badges.push(b.id); setTimeout(() => showToast(`🏅 Badge: ${b.name}`), 650); });
 
+  const newlyCompletedQuests = QUESTS.filter(qd => !pr.questsCompleted.includes(qd.id) && qd.progress(pr) >= qd.target);
+  newlyCompletedQuests.forEach(qd => {
+    pr.questsCompleted.push(qd.id);
+    pr.xp += qd.xp; les.xpEarned += qd.xp;
+    pr.coins += qd.gems; les.gemsEarned += qd.gems;
+    setTimeout(() => showToast(`🎯 Quest complete: ${qd.name}! +${qd.xp} XP`), 1000);
+  });
+
   await saveProgress();
   render();
 }
@@ -1748,18 +1798,20 @@ app.addEventListener('click', (e) => {
   if (action === 'new-adventurer') newAdventurer();
   else if (action === 'continue') continueProfile(el.dataset.id);
   else if (action === 'back-to-login') backToLogin();
+  else if (action === 'back-from-create') backFromCreate();
+  else if (action === 'edit-avatar') editAvatar();
   else if (action === 'pick-base') pickBase(el.dataset.val);
   else if (action === 'pick-color') pickColor(parseInt(el.dataset.val,10));
   else if (action === 'pick-accessory') pickAccessory(el.dataset.val);
   else if (action === 'save-avatar') saveAvatar();
   else if (action === 'enter-strand') enterStrand(el.dataset.strand);
-  else if (action === 'start-lesson') startLesson();
   else if (action === 'select-choice') selectChoice(parseInt(el.dataset.idx,10));
   else if (action === 'check-answer') checkAnswer();
   else if (action === 'continue-lesson') continueLesson();
   else if (action === 'quit-lesson') quitLesson();
   else if (action === 'go-map') goMap();
   else if (action === 'go-dashboard') goDashboard();
+  else if (action === 'go-tab') goTab(el.dataset.screen);
   else if (action === 'switch-profile') switchProfile();
   else if (action === 'reset-progress') resetProgress();
 });
