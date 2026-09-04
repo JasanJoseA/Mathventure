@@ -8,18 +8,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* ===== Design tokens — Duolingo-inspired: bright, chunky, rounded ===== */
-  --ink:#3C3C3C;
-  --ink-soft:#6B7280;
-  --bg:#F7F7F7;
+  /* ===== Mathventure tokens — bright study-club palette ===== */
+  --ink:#14213D;
+  --ink-soft:#5D6B82;
+  --bg:#F4F8F7;
   --paper:#FFFFFF;
-  --line:#E5E5E5;
+  --line:#D8E5E2;
 
-  --green:#58CC02;      --green-deep:#46A302;   /* primary CTA / correct */
-  --blue:#1CB0F6;       --blue-deep:#1899D6;    /* secondary / info */
-  --red:#FF4B4B;        --red-deep:#EA2B2B;     /* incorrect / hearts */
-  --gold:#FFC800;       --gold-deep:#E5A800;    /* XP / gems */
-  --purple:#CE82FF;     --purple-deep:#A560E0;
+  --green:#47C7A5;      --green-deep:#168A70;   /* primary CTA / correct */
+  --blue:#35B7D8;       --blue-deep:#147B99;    /* secondary / info */
+  --red:#F26B5B;        --red-deep:#C8483D;     /* incorrect / hearts */
+  --gold:#F8C957;       --gold-deep:#B97808;    /* XP / gems */
+  --purple:#8E7CDE;     --purple-deep:#5E4DB0;
 
   /* strand colors (kept distinct per world) */
   --teal:#1CC0A6;       --teal-deep:#0FA089;
@@ -30,6 +30,10 @@
 
   --ok:#58CC02;
   --warn:#FF4B4B;
+  --mint-soft:#DDF7EF;
+  --sun-soft:#FFF4D2;
+  --sky-soft:#E4F7FB;
+  --rose-soft:#FFE4DF;
   --radius-lg:24px; --radius-md:16px; --radius-sm:12px;
   --font-display:'Baloo 2', system-ui, sans-serif;
   --font-body:'Nunito', system-ui, sans-serif;
@@ -40,6 +44,8 @@ body{
   font-family:var(--font-body);
   color:var(--ink);
   background:var(--bg);
+  background-image:linear-gradient(135deg, rgba(71,199,165,.08) 25%, transparent 25%), linear-gradient(315deg, rgba(53,183,216,.06) 25%, transparent 25%);
+  background-size:38px 38px;
   min-height:100vh;
   overflow-x:hidden;
 }
@@ -50,7 +56,7 @@ button{font-family:var(--font-body); cursor:pointer;}
 :focus-visible{outline:3px solid var(--blue); outline-offset:2px;}
 @media (prefers-reduced-motion: reduce){ *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;} }
 
-#app{max-width:1000px; margin:0 auto; padding:20px 20px 100px; min-height:100vh; position:relative;}
+#app{width:100%; margin:0 auto; padding:clamp(18px,3vw,34px) clamp(18px,4vw,64px) 116px; min-height:100vh; position:relative;}
 
 /* ---------- Buttons: Duolingo-style chunky 3D press ---------- */
 .btn{
@@ -126,7 +132,7 @@ button{font-family:var(--font-body); cursor:pointer;}
 .celebration .small{font-weight:800; margin-top:2px;}
 .skill-checklist{display:flex; flex-direction:column; gap:10px; margin-top:12px;}
 .skill-check{background:var(--paper); border:2px solid var(--line); border-radius:14px; padding:12px 14px;}
-.skill-check.mastered{background:#EBFAE0; border-color:#B7EE85;}
+.skill-check.mastered{background:var(--mint-soft); border-color:#9DE3CF;}
 .skill-check .skill-meta{display:flex; justify-content:space-between; gap:10px; font-weight:800;}
 .skill-check .skill-progress{font-size:.76rem; color:var(--ink-soft); margin-top:5px;}
 .refresh-card{max-width:620px; margin:50px auto 0; text-align:center;}
@@ -172,7 +178,7 @@ input[type=text]:focus{border-color:var(--blue);}
   padding:10px; font-size:1.5rem; line-height:1; width:56px; height:56px;
   display:flex; align-items:center; justify-content:center; transition:transform .1s ease; border-bottom-width:4px;
 }
-.option-chip.selected{border-color:var(--green); background:#EBFAE0; transform:scale(1.08);}
+.option-chip.selected{border-color:var(--green); background:var(--mint-soft); transform:scale(1.08);}
 .color-chip{width:44px; height:44px; border-radius:50%; border:3px solid transparent; cursor:pointer;}
 .color-chip.selected{border-color:var(--ink); transform:scale(1.12); box-shadow:0 0 0 2px #fff, 0 0 0 4px var(--green);}
 
@@ -224,8 +230,8 @@ input[type=text]:focus{border-color:var(--blue);}
 .choice-btn:hover:not(:disabled){border-color:#C8C8C8;}
 .choice-btn:disabled{cursor:default;}
 .choice-btn.selected{border-color:var(--blue); background:#DDF4FF;}
-.choice-btn.correct{background:#D7FFB8; border-color:var(--green); color:var(--green-deep);}
-.choice-btn.incorrect{background:#FFDBDB; border-color:var(--red); color:var(--red-deep); animation:shake .4s ease;}
+.choice-btn.correct{background:var(--mint-soft); border-color:var(--green); color:var(--green-deep);}
+.choice-btn.incorrect{background:var(--rose-soft); border-color:var(--red); color:var(--red-deep); animation:shake .4s ease;}
 .choice-btn.faded{opacity:.5;}
 
 /* ---------- Sticky bottom action bar (Duolingo signature) ---------- */
@@ -234,9 +240,9 @@ input[type=text]:focus{border-color:var(--blue);}
   background:var(--paper); border-top:2px solid var(--line);
   padding:16px 20px calc(16px + env(safe-area-inset-bottom));
 }
-.bottom-bar-inner{max-width:1000px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px;}
-.bottom-bar.state-good{background:#D7FFB8; border-top-color:#B7EE85;}
-.bottom-bar.state-bad{background:#FFDBDB; border-top-color:#FFB3B3;}
+.bottom-bar-inner{width:100%; max-width:1400px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px;}
+.bottom-bar.state-good{background:var(--mint-soft); border-top-color:#9DE3CF;}
+.bottom-bar.state-bad{background:var(--rose-soft); border-top-color:#F2B5AA;}
 .bottom-feedback{display:flex; align-items:center; gap:12px; font-weight:800; flex:1; min-width:0;}
 .bottom-feedback .headline{font-family:var(--font-display); font-size:1.1rem;}
 .bottom-feedback .sub{font-size:.85rem; font-weight:700; color:var(--ink-soft); margin-top:2px;}
@@ -277,31 +283,46 @@ input[type=text]:focus{border-color:var(--blue);}
   display:flex; justify-content:space-around; gap:4px;
   padding:8px 6px calc(8px + env(safe-area-inset-bottom));
 }
+.tab-bar{box-shadow:0 -10px 28px rgba(20,33,61,.08);}
 .tab-btn{
   background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:2px;
   color:var(--ink-soft); font-weight:800; font-size:.68rem; font-family:var(--font-body);
   padding:6px 4px; border-radius:12px; flex:1; max-width:120px; transition:background .12s ease, color .12s ease;
 }
 .tab-btn .tab-icon{font-size:1.35rem; line-height:1;}
-.tab-btn.active{color:var(--green-deep); background:#EBFAE0;}
+.tab-btn.active{color:var(--green-deep); background:#DDF7EF;}
 
 /* ---------- Skill card caption ---------- */
 .skill-caption{font-size:.72rem; color:var(--ink-soft); font-weight:700; margin-top:4px;}
 
 /* ---------- Info banner ---------- */
 .info-banner{
-  display:flex; align-items:flex-start; gap:10px; background:#EAF6FF; border:2px solid #CDEBFF;
+  display:flex; align-items:flex-start; gap:10px; background:var(--sky-soft); border:2px solid #B9E7F0;
   border-radius:16px; padding:14px 16px; margin:12px 0 4px; font-size:.88rem; font-weight:700; color:#0F5C82;
 }
 .info-banner .ii{font-size:1.2rem; flex-shrink:0;}
 .grade-choice-row{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin:18px 0;}
 .grade-choice{border:2px solid var(--line); border-bottom-width:4px; border-radius:14px; background:var(--paper); padding:14px 8px; font-family:var(--font-display); font-weight:800; font-size:1.05rem; color:var(--ink);}
-.grade-choice:hover,.grade-choice.selected{border-color:var(--green); background:#EBFAE0;}
+.grade-choice:hover,.grade-choice.selected{border-color:var(--green); background:var(--mint-soft);}
 .mistake-list{display:flex; flex-direction:column; gap:10px; margin-top:12px;}
-.mistake-item{background:#FFF6DA; border:2px solid #F4D98A; border-radius:14px; padding:12px 14px;}
+.mistake-item{background:var(--sun-soft); border:2px solid #F0D58B; border-radius:14px; padding:12px 14px;}
 .mistake-item .mistake-question{font-family:var(--font-display); font-weight:800;}
 .mistake-item .mistake-detail{font-size:.8rem; color:var(--ink-soft); margin-top:4px;}
+.training-launch{display:grid; grid-template-columns:1fr auto; align-items:center; gap:18px; margin-top:18px; padding:20px; background:linear-gradient(120deg,#14213D,#20516A); color:#fff; border:0; box-shadow:0 12px 0 rgba(20,33,61,.12);}
+.training-launch h3{color:#fff; font-size:1.35rem;}
+.training-launch p{color:#D7EEF0; margin-top:4px; font-size:.88rem; font-weight:700;}
+.training-launch .btn{white-space:nowrap;}
+.focus-chip{display:inline-flex; align-items:center; gap:6px; background:#DDF7EF; color:var(--green-deep); border-radius:999px; padding:5px 10px; font-size:.75rem; font-weight:800; margin-top:10px;}
+.calm-control{display:flex; align-items:center; justify-content:flex-end; gap:8px; margin:0 0 12px;}
+.calm-control .btn{font-size:.75rem; padding:8px 12px;}
 @media (max-width:560px){ .grade-choice-row{grid-template-columns:repeat(3,1fr);} }
+@media (max-width:720px){
+  .training-launch{grid-template-columns:1fr;}
+  .training-launch .btn{width:100%;}
+  .topbar{align-items:flex-start;}
+  .stat-pills{width:100%;}
+  .pill{flex:1; justify-content:center;}
+}
 
 
 .section-title{font-family:var(--font-display); font-weight:800; font-size:1.3rem; margin:26px 0 4px;}
@@ -1240,6 +1261,40 @@ const state = {
   newBadgesQueue:[],
 };
 
+let calmAudio = null;
+function setCalmMusic(enabled){
+  if (!enabled){
+    if (calmAudio){ calmAudio.master.gain.exponentialRampToValueAtTime(0.0001, calmAudio.context.currentTime + .25); setTimeout(() => { calmAudio.context.close(); calmAudio = null; }, 300); }
+    if (state.lesson) state.lesson.calmMusic = false;
+    return;
+  }
+  if (calmAudio){ if (state.lesson) state.lesson.calmMusic = true; return; }
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return;
+  const context = new AudioContext();
+  const master = context.createGain();
+  master.gain.value = 0.0001;
+  master.connect(context.destination);
+  [220, 277.18].forEach((frequency, index) => {
+    const oscillator = context.createOscillator();
+    const toneGain = context.createGain();
+    oscillator.type = index ? 'sine' : 'triangle';
+    oscillator.frequency.value = frequency;
+    toneGain.gain.value = index ? 0.018 : 0.025;
+    oscillator.connect(toneGain).connect(master);
+    oscillator.start();
+  });
+  master.gain.exponentialRampToValueAtTime(0.13, context.currentTime + 1.2);
+  calmAudio = {context, master};
+  if (state.lesson) state.lesson.calmMusic = true;
+}
+function toggleCalmMusic(){
+  if (!state.lesson) return;
+  if (state.lesson.calmMusic) setCalmMusic(false);
+  else setCalmMusic(true);
+  render();
+}
+
 const app = document.getElementById('app');
 function render(){
   window.scrollTo({top:0, behavior:'instant' in window ? 'instant' : 'auto'});
@@ -1556,6 +1611,7 @@ function renderQuest(){
       </div>
       <div class="hearts-row" title="Hearts left — a wrong answer costs one heart">${hearts}</div>
     </div>
+    ${les.training ? `<div class="calm-control"><span class="muted">${les.calmMusic ? 'Calm music on' : 'Calm music paused'}</span><button class="btn btn-outline" data-action="toggle-calm-music">${les.calmMusic ? '🔇 Pause music' : '🎧 Play music'}</button></div>` : ''}
 
     <div class="question-card">
       <span class="strand-tag" style="background:${s.color};">${s.icon} ${s.name} · ${gradeLabel(state.progress.strandGrade[les.strand])}</span>
@@ -1702,7 +1758,7 @@ function renderDashboard(){
       </div>`;
     }).join('')}
 
-    ${weakest ? `<div class="card" style="margin-top:18px; background:#FFF6DA;"><strong>Suggested focus:</strong> ${weakest.name} could use a little more practice right now.</div>` : ''}
+    ${weakest ? `<div class="card" style="margin-top:18px; background:var(--sun-soft);"><strong>Suggested focus:</strong> ${weakest.name} could use a little more practice right now.</div>` : ''}
 
     <div class="section-title">Badges</div>
     <p class="muted" style="font-size:.85rem; margin-top:-2px;">One-time achievements — hover or tap one to see what it takes.</p>
@@ -1729,6 +1785,14 @@ function renderMistakes(){
     ${renderTopbar()}
     <h2>Mistake Training</h2>
     <p class="muted">Practise the same skills and question styles that have been tricky for you.</p>
+    <div class="card training-launch">
+      <div>
+        <h3>Focus lesson</h3>
+        <p>Calm background tones and a short lesson built around your tricky skills.</p>
+        <span class="focus-chip">🎧 Calm focus · ${mistakes.length ? `${mistakes.length} saved mistake${mistakes.length === 1 ? '' : 's'}` : 'ready for a warm-up'}</span>
+      </div>
+      <button class="btn btn-gold btn-lg" data-action="start-focus-training">Start focus lesson</button>
+    </div>
     ${mistakes.length ? `<div class="mistake-list">
       ${mistakes.slice(0, 12).map(m => {
         const wrongStreak = pr.skillWrongStreak[skillKey(m.strand, m.grade, m.skill)] || 0;
@@ -1740,7 +1804,7 @@ function renderMistakes(){
         </div>`;
       }).join('')}
     </div>
-    <button class="btn btn-coral btn-block" style="margin-top:14px;" data-action="start-training">🎯 Practise my mistakes</button>`
+    <button class="btn btn-outline btn-block" style="margin-top:14px;" data-action="start-training">🎯 Practise my mistakes</button>`
     : `<div class="info-banner"><span class="ii">✨</span><span>Your mistake notebook is empty. Missed answers will appear here with guided tips.</span></div>`}
     ${renderBottomTabs('mistakes')}
   </div>`;
@@ -1761,7 +1825,7 @@ function renderQuests(){
         const done = pr.questsCompleted.includes(q.id);
         const pct = Math.round((cur / q.target) * 100);
         return `<div class="card" style="display:flex; align-items:center; gap:14px;">
-          <div style="width:46px;height:46px;border-radius:14px;background:${done ? '#D7FFB8' : '#F0F0F0'};display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">${done ? '✅' : q.icon}</div>
+          <div style="width:46px;height:46px;border-radius:14px;background:${done ? 'var(--mint-soft)' : 'var(--bg)'};display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">${done ? '✅' : q.icon}</div>
           <div style="flex:1; min-width:0;">
             <div class="row-between"><strong>${q.name}</strong><span class="muted" style="font-size:.78rem;">${Math.min(cur,q.target)}/${q.target}</span></div>
             <div class="muted" style="font-size:.82rem; margin:2px 0 8px;">${q.desc}</div>
@@ -1961,7 +2025,7 @@ function drawQuestion(key){
 
 function enterStrand(key, training){
   const firstMistake = training ? (state.progress.mistakes || []).find(m => m.strand === key) : null;
-  state.lesson = { strand:key, index:0, total:LESSON_LENGTH, hearts:HEARTS_MAX, correctCount:0, xpEarned:0, gemsEarned:0, training:!!training, trainingSkill:firstMistake ? firstMistake.skill : null };
+  state.lesson = { strand:key, index:0, total:LESSON_LENGTH, hearts:HEARTS_MAX, correctCount:0, xpEarned:0, gemsEarned:0, training:!!training, calmMusic:false, trainingSkill:firstMistake ? firstMistake.skill : null };
   state.phase = 'selecting';
   state.selectedChoice = null;
   drawQuestion(key);
@@ -2055,6 +2119,7 @@ function continueLesson(){
     return;
   }
   if (les.hearts <= 0 || les.index >= les.total){
+    setCalmMusic(false);
     state.screen = 'lesson-complete';
     render();
     return;
@@ -2065,7 +2130,7 @@ function continueLesson(){
   render();
 }
 
-function quitLesson(){ state.screen = 'map'; render(); }
+function quitLesson(){ setCalmMusic(false); state.screen = 'map'; render(); }
 
 async function resetProgress(){
   if (!confirm('Reset all progress for ' + state.profile.name + '? This cannot be undone.')) return;
@@ -2082,6 +2147,14 @@ function startTraining(){
   const mistakes = state.progress.mistakes || [];
   const focus = mistakes.length ? mistakes[0].strand : STRANDS[0].key;
   enterStrand(focus, true);
+}
+
+function startFocusTraining(){
+  const mistakes = state.progress.mistakes || [];
+  const focus = mistakes.length ? mistakes[0].strand : STRANDS[0].key;
+  enterStrand(focus, true);
+  setCalmMusic(true);
+  render();
 }
 
 function startRefresh(){
@@ -2123,6 +2196,8 @@ app.addEventListener('click', (e) => {
   else if (action === 'go-mistakes') goMistakes();
   else if (action === 'go-tab') goTab(el.dataset.screen);
   else if (action === 'start-training') startTraining();
+  else if (action === 'start-focus-training') startFocusTraining();
+  else if (action === 'toggle-calm-music') toggleCalmMusic();
   else if (action === 'switch-profile') switchProfile();
   else if (action === 'reset-progress') resetProgress();
 });
