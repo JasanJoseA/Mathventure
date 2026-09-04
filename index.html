@@ -120,6 +120,16 @@ button{font-family:var(--font-body); cursor:pointer;}
 @keyframes fadeUp{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
 @keyframes popIn{ 0%{transform:scale(.6); opacity:0;} 70%{transform:scale(1.08);} 100%{transform:scale(1); opacity:1;} }
 @keyframes shake{ 10%,90%{transform:translateX(-2px);} 20%,80%{transform:translateX(3px);} 30%,50%,70%{transform:translateX(-5px);} 40%,60%{transform:translateX(5px);} }
+@keyframes celebrationPop{0%{opacity:0; transform:translate(-50%,-40%) scale(.6) rotate(-5deg);} 55%{transform:translate(-50%,-50%) scale(1.08) rotate(2deg);} 100%{opacity:1; transform:translate(-50%,-50%) scale(1) rotate(0);}}
+.celebration{position:fixed; left:50%; top:42%; z-index:60; pointer-events:none; background:var(--gold); color:var(--ink); border:4px solid var(--gold-deep); border-radius:24px; padding:18px 28px; box-shadow:0 10px 0 rgba(229,168,0,.35), 0 14px 30px rgba(0,0,0,.18); text-align:center; animation:celebrationPop .55s ease both;}
+.celebration .big{font-family:var(--font-display); font-size:2rem; font-weight:800; display:block;}
+.celebration .small{font-weight:800; margin-top:2px;}
+.skill-checklist{display:flex; flex-direction:column; gap:10px; margin-top:12px;}
+.skill-check{background:var(--paper); border:2px solid var(--line); border-radius:14px; padding:12px 14px;}
+.skill-check.mastered{background:#EBFAE0; border-color:#B7EE85;}
+.skill-check .skill-meta{display:flex; justify-content:space-between; gap:10px; font-weight:800;}
+.skill-check .skill-progress{font-size:.76rem; color:var(--ink-soft); margin-top:5px;}
+.refresh-card{max-width:620px; margin:50px auto 0; text-align:center;}
 
 /* ---------- Landing ---------- */
 .hero{ text-align:center; padding:30px 16px 8px; }
@@ -1030,6 +1040,58 @@ const GRADES = [5,6,7,8,9];
 function strandByKey(k){ return STRANDS.find(s => s.key === k); }
 function gradeLabel(g){ return g === 9 ? 'Grade 9 · Challenge' : `Grade ${g}`; }
 
+const SKILL_CATALOG = {
+  number: {
+    5:['Multiplication','Division','Fractions','Decimal comparison','Decimal subtraction'],
+    6:['Integer comparison','Percent of a number','Ratios','Order of operations'],
+    7:['Integer addition and subtraction','Integer multiplication','Fractions and decimals','Exponents'],
+    8:['Square roots','Discounts','Tax','Simple interest'],
+    9:['Multi-step money problems','Simplifying expressions','Percent change']
+  },
+  algebra: {
+    5:['Pattern terms','Pattern rules','One-step equations'],
+    6:['Solving equations','Expressions','Evaluating expressions'],
+    7:['Two-step equations','Linear relationships','Input-output rules'],
+    8:['Equations with variables on both sides','Slope','Linear relationships'],
+    9:['Combining like terms','Equations with fractions','Slope-intercept form']
+  },
+  spatial: {
+    5:['Rectangle area','Triangle area','Perimeter'],
+    6:['Volume','Angles','Unit conversion'],
+    7:['Circle circumference','Circle area','Scale factors'],
+    8:['Composite volume','Pythagorean theorem','Surface area'],
+    9:['Prisms and cylinders','Composite shapes','Pythagorean theorem']
+  },
+  data: {
+    5:['Reading bar graphs','Mean','Range'],
+    6:['Probability','Percent of a group','Median'],
+    7:['Mode','Frequency tables','Combinations'],
+    8:['Weighted averages','Data displays','Probability models'],
+    9:['Multi-step statistics','Counting principles','Weighted averages']
+  },
+  financial: {
+    5:['Saving goals','Money subtraction','Simple interest'],
+    6:['Percent savings','Sale prices','Tax'],
+    7:['Simple interest','Net pay','Currency conversion'],
+    8:['Discount and tax','Compound interest','Budgeting'],
+    9:['Compound interest','Budgeting','Multi-step money problems']
+  }
+};
+function skillsFor(key, grade){ return SKILL_CATALOG[key]?.[grade] || []; }
+function skillKey(key, grade, skill){ return `${key}:${grade}:${skill}`; }
+function inferSkill(key, grade, prompt){
+  const p = prompt.toLowerCase();
+  const rules = {
+    number:[[5,'multiplication','Multiplication'],[5,'÷','Division'],[5,'fraction','Fractions'],[5,'decimal is','Decimal comparison'],[5,'decimal','Decimal subtraction'],[6,'integer','Integer comparison'],[6,'% of','Percent of a number'],[6,':','Ratios'],[6,'order of','Order of operations'],[7,' × ','Integer multiplication'],[7,' + ','Integer addition and subtraction'],[7,'percent','Fractions and decimals'],[7,'²','Exponents'],[7,'³','Exponents'],[8,'√','Square roots'],[8,'sale','Discounts'],[8,'tax','Tax'],[8,'interest','Simple interest'],[9,'jacket','Multi-step money problems'],[9,'simplify','Simplifying expressions'],[9,'percent change','Percent change']],
+    algebra:[[5,'pattern','Pattern terms'],[5,'rule','Pattern rules'],[5,'▢','One-step equations'],[6,'solve for','Solving equations'],[6,'expression','Expressions'],[6,'evaluate','Evaluating expressions'],[7,'solve for','Two-step equations'],[7,'relationship','Linear relationships'],[7,'input-output','Input-output rules'],[8,'both sides','Equations with variables on both sides'],[8,'slope','Slope'],[8,'linear','Linear relationships'],[9,'simplify','Combining like terms'],[9,'x/2','Equations with fractions'],[9,'slope','Slope-intercept form']],
+    spatial:[[5,'rectangle','Rectangle area'],[5,'triangle','Triangle area'],[5,'perimeter','Perimeter'],[6,'volume','Volume'],[6,'angle','Angles'],[6,'convert','Unit conversion'],[7,'circumference','Circle circumference'],[7,'circle','Circle area'],[7,'scale','Scale factors'],[8,'composite','Composite volume'],[8,'pythagorean','Pythagorean theorem'],[8,'surface','Surface area'],[9,'prism','Prisms and cylinders'],[9,'cylinder','Prisms and cylinders'],[9,'shape','Composite shapes']],
+    data:[[5,'bar graph','Reading bar graphs'],[5,'mean','Mean'],[5,'range','Range'],[6,'probability','Probability'],[6,'% of','Percent of a group'],[6,'median','Median'],[7,'mode','Mode'],[7,'frequency','Frequency tables'],[7,'ways','Combinations'],[8,'weighted','Weighted averages'],[8,'graph','Data displays'],[8,'probability','Probability models'],[9,'mean','Multi-step statistics'],[9,'ways','Counting principles'],[9,'weighted','Weighted averages']],
+    financial:[[5,'save','Saving goals'],[5,'left','Money subtraction'],[5,'interest','Simple interest'],[6,'save','Percent savings'],[6,'sale','Sale prices'],[6,'tax','Tax'],[7,'interest','Simple interest'],[7,'paycheque','Net pay'],[7,'cad','Currency conversion'],[8,'off','Discount and tax'],[8,'compound','Compound interest'],[8,'budget','Budgeting'],[9,'compound','Compound interest'],[9,'budget','Budgeting'],[9,'income','Multi-step money problems']]
+  };
+  const match = (rules[key] || []).find(([g, term]) => g === grade && p.includes(term));
+  return match ? match[2] : skillsFor(key, grade)[0];
+}
+
 // ===================================================================
 // AVATAR CONFIG
 // ===================================================================
@@ -1083,8 +1145,6 @@ async function storageDelete(key){
   try { await window.storage.delete(key, false); return true; } catch(e){ return false; }
 }
 
-const LEVEL_UP_STREAK = 3;   // consecutive correct at current grade to level up
-const LEVEL_DOWN_MISSES = 2; // consecutive incorrect at current grade to step back down
 const LESSON_LENGTH = 8;     // questions per lesson
 const HEARTS_MAX = 5;        // hearts per lesson
 
@@ -1107,6 +1167,7 @@ const TABS = [
   { key:'map', label:'Learn', icon:'🗺️' },
   { key:'quests', label:'Quests', icon:'🎯' },
   { key:'dashboard', label:'Progress', icon:'📊' },
+  { key:'mistakes', label:'Training', icon:'🎯' },
   { key:'profile', label:'Profile', icon:'👤' },
 ];
 function renderBottomTabs(active){
@@ -1124,8 +1185,40 @@ function freshProgress(){
     xp:0, coins:0, totalAnswered:0, totalCorrect:0,
     currentStreak:0, bestStreak:0,
     strandGrade, strandStreakUp, strandStreakDown, strandAnswered, strandCorrect,
-    badges:[], questsCompleted:[], mistakes:[]
+    skillStats:{}, skillWrongStreak:{}, badges:[], questsCompleted:[], mistakes:[]
   };
+}
+
+function ensureProgressShape(progress){
+  const base = freshProgress();
+  const result = Object.assign(base, progress || {});
+  result.mistakes = result.mistakes || [];
+  result.skillStats = result.skillStats || {};
+  result.skillWrongStreak = result.skillWrongStreak || {};
+  STRANDS.forEach(s => {
+    result.strandGrade[s.key] = result.strandGrade[s.key] || 5;
+    result.strandAnswered[s.key] = result.strandAnswered[s.key] || 0;
+    result.strandCorrect[s.key] = result.strandCorrect[s.key] || 0;
+    result.strandStreakUp[s.key] = result.strandStreakUp[s.key] || 0;
+    result.strandStreakDown[s.key] = result.strandStreakDown[s.key] || 0;
+  });
+  return result;
+}
+function skillStatsFor(progress, key, grade, skill){
+  const id = skillKey(key, grade, skill);
+  if (!progress.skillStats[id]) progress.skillStats[id] = {attempts:0, correct:0};
+  return progress.skillStats[id];
+}
+function skillAccuracy(progress, key, grade, skill){
+  const stats = skillStatsFor(progress, key, grade, skill);
+  return stats.attempts ? Math.round((stats.correct / stats.attempts) * 100) : 0;
+}
+function gradeMastered(progress, key, grade){
+  const skills = skillsFor(key, grade);
+  return skills.length > 0 && skills.every(skill => {
+    const stats = skillStatsFor(progress, key, grade, skill);
+    return stats.attempts >= 5 && stats.correct / stats.attempts >= .95;
+  });
 }
 
 // ===================================================================
@@ -1143,6 +1236,7 @@ const state = {
   phase:'selecting',      // selecting | checked
   selectedChoice:null,
   lesson:null,            // { strand, index, total, hearts, correctCount, xpEarned, gemsEarned }
+  refreshTopic:null,
   newBadgesQueue:[],
 };
 
@@ -1155,9 +1249,11 @@ function render(){
   else if (state.screen === 'grade') app.innerHTML = renderGrade();
   else if (state.screen === 'map') app.innerHTML = renderMap();
   else if (state.screen === 'quest') app.innerHTML = renderQuest();
+  else if (state.screen === 'refresh') app.innerHTML = renderRefresh();
   else if (state.screen === 'lesson-complete') app.innerHTML = renderLessonComplete();
   else if (state.screen === 'dashboard') app.innerHTML = renderDashboard();
   else if (state.screen === 'quests') app.innerHTML = renderQuests();
+  else if (state.screen === 'mistakes') app.innerHTML = renderMistakes();
   else if (state.screen === 'profile') app.innerHTML = renderProfileScreen();
   attachHandlers();
 }
@@ -1170,6 +1266,37 @@ function showToast(text){
   t.className='toast'; t.textContent = text;
   row.appendChild(t);
   setTimeout(() => t.remove(), 2300);
+}
+
+function showStreakCelebration(streak){
+  const messages = ['Perfect!', 'Consistent!', 'Amazing!', 'Keep going!'];
+  const el = document.createElement('div');
+  el.className = 'celebration';
+  el.innerHTML = `<span class="big">🔥 ${messages[(streak / 5 - 1) % messages.length]}</span><span class="small">${streak} correct in a row!</span>`;
+  document.body.appendChild(el);
+  playStreakSound();
+  setTimeout(() => el.remove(), 2200);
+}
+
+function playStreakSound(){
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const now = ctx.currentTime;
+    [523.25, 659.25, 783.99].forEach((frequency, index) => {
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = 'triangle';
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(.0001, now + index * .1);
+      gain.gain.exponentialRampToValueAtTime(.16, now + index * .1 + .03);
+      gain.gain.exponentialRampToValueAtTime(.0001, now + index * .1 + .28);
+      oscillator.connect(gain); gain.connect(ctx.destination);
+      oscillator.start(now + index * .1); oscillator.stop(now + index * .1 + .3);
+    });
+    setTimeout(() => ctx.close(), 700);
+  } catch(e) { /* Audio is optional and may be unavailable in some browsers. */ }
 }
 
 function avatarHtml(profileLike, size){
@@ -1198,7 +1325,7 @@ async function init(){
   for (const k of keys){
     const p = await storageGet(k);
     if (p) {
-      p.progress = await storageGet('progress:' + p.id) || freshProgress();
+      p.progress = ensureProgressShape(await storageGet('progress:' + p.id) || freshProgress());
       profiles.push(p);
     }
   }
@@ -1358,19 +1485,23 @@ function renderMap(){
     <div class="map-wrap">
       <div class="center" style="margin-bottom:8px;">
         <h2>Choose a world to practise</h2>
-        <p class="muted">Each lesson has ${LESSON_LENGTH} questions and ${HEARTS_MAX} hearts. Answer well and you'll level up fast.</p>
+        <p class="muted">Each lesson has ${LESSON_LENGTH} questions and ${HEARTS_MAX} hearts. Master every skill to unlock the next grade.</p>
       </div>
       <div class="info-banner">
         <span class="ii">💡</span>
-        <span>Tap a world below to start a lesson. Get ${LEVEL_UP_STREAK} answers right in a row to level up that world's grade — miss ${LEVEL_DOWN_MISSES} in a row and it steps back down so it never feels too hard or too easy.</span>
+        <span>Tap a world below to start a lesson. Complete every listed skill at 95% accuracy with at least five attempts to unlock the next grade.</span>
       </div>
       <div class="node-grid" style="margin-top:18px;">
         ${STRANDS.map(s => {
           const grade = pr.strandGrade[s.key];
           const segments = GRADES.length; // 5 segments, one per grade 5-9
           const filled = grade - 5; // 0..4 fully completed segments
-          const up = pr.strandStreakUp[s.key];
-          const upFrac = up / LEVEL_UP_STREAK; // progress into current segment
+          const skills = skillsFor(s.key, grade);
+          const mastered = skills.filter(skill => {
+            const stats = skillStatsFor(pr, s.key, grade, skill);
+            return stats.attempts >= 5 && stats.correct / stats.attempts >= .95;
+          }).length;
+          const upFrac = skills.length ? mastered / skills.length : 0;
           const stops = [];
           for (let i = 0; i < segments; i++){
             const segStart = (i / segments) * 360, segEnd = ((i+1) / segments) * 360;
@@ -1380,8 +1511,8 @@ function renderMap(){
             stops.push(`#E5E5E5 ${segFillEnd}deg ${segEnd - 3}deg`, `#fff ${segEnd - 3}deg ${segEnd}deg`);
           }
           const ring = `conic-gradient(${stops.join(',')})`;
-          const maxed = grade >= 9 && up === 0 && filled === 4;
-          const caption = maxed ? 'Challenge mastered!' : `${up}/${LEVEL_UP_STREAK} correct in a row to level up`;
+          const maxed = grade >= 9 && gradeMastered(pr, s.key, grade);
+          const caption = maxed ? 'Challenge mastered!' : `${mastered}/${skills.length} skills mastered`;
           return `
           <button class="skill-card" data-action="enter-strand" data-strand="${s.key}">
             <div class="skill-node">
@@ -1465,6 +1596,24 @@ function renderQuest(){
 }
 
 // ===================================================================
+// SCREEN: CONCEPT REFRESHER
+// ===================================================================
+function renderRefresh(){
+  const topic = state.refreshTopic;
+  return `<div class="screen">
+    ${renderTopbar()}
+    <div class="panel refresh-card">
+      <div style="font-size:3.5rem;">💡</div>
+      <h2 style="margin-top:10px;">Let’s refresh ${escapeHtml(topic.skill)}</h2>
+      <p class="muted" style="margin-top:10px;">You’ve missed this skill five times in a row. Take a moment to use this method before trying a new example.</p>
+      <div class="info-banner" style="text-align:left; margin-top:18px;"><span class="ii">🧠</span><span>${escapeHtml(topic.explanation)}</span></div>
+      <button class="btn btn-primary btn-lg btn-block" style="margin-top:14px;" data-action="start-refresh">Try a guided example</button>
+      <button class="link-btn" style="margin-top:10px;" data-action="go-mistakes">Back to Training</button>
+    </div>
+  </div>`;
+}
+
+// ===================================================================
 // SCREEN: LESSON COMPLETE
 // ===================================================================
 function renderLessonComplete(){
@@ -1498,7 +1647,6 @@ function renderDashboard(){
   const pr = state.progress;
   const accuracy = pr.totalAnswered ? Math.round((pr.totalCorrect / pr.totalAnswered) * 100) : 0;
   const weakest = STRANDS.slice().sort((a,b) => pr.strandGrade[a.key] - pr.strandGrade[b.key])[0];
-  const mistakes = (pr.mistakes || []).slice(0, 6);
   return `<div class="screen">
     ${renderTopbar()}
     <h2>Your Progress</h2>
@@ -1532,17 +1680,27 @@ function renderDashboard(){
       }).join('')}
     </div>
 
-    <div class="section-title">Mistake training</div>
-    <p class="muted" style="font-size:.85rem; margin-top:-2px;">Review the questions you missed, then practise the world that needs the most attention.</p>
-    ${mistakes.length ? `<div class="mistake-list">
-      ${mistakes.map(m => `<div class="mistake-item">
-        <div class="mistake-question">${escapeHtml(m.prompt)}</div>
-        <div class="mistake-detail">${escapeHtml(m.strandName)} · Your answer: ${escapeHtml(m.selected)} · Correct: ${escapeHtml(m.correct)}</div>
-        <div class="mistake-detail"><strong>Tip:</strong> ${escapeHtml(m.explanation)}</div>
-      </div>`).join('')}
-    </div>
-    <button class="btn btn-coral btn-block" style="margin-top:12px;" data-action="start-training">🎯 Practise my mistakes</button>`
-    : `<div class="info-banner"><span class="ii">✨</span><span>Your mistake notebook is empty. Answer a few questions and missed answers will appear here with tips.</span></div>`}
+    <div class="section-title">Skill checklists</div>
+    <p class="muted" style="font-size:.85rem; margin-top:-2px;">Each skill in every island needs at least five attempts and 95% accuracy before that island advances.</p>
+    ${STRANDS.map(s => {
+      return `<div class="card" style="margin-top:12px;">
+        <div class="row-between"><strong>${s.icon} ${s.name}</strong><span class="muted">Current: ${gradeLabel(pr.strandGrade[s.key])}</span></div>
+        ${GRADES.map(grade => `<details ${grade === pr.strandGrade[s.key] ? 'open' : ''} style="margin-top:12px;">
+          <summary style="cursor:pointer; font-weight:800;">${gradeLabel(grade)}${grade < pr.strandGrade[s.key] ? ' · completed or passed' : grade === pr.strandGrade[s.key] ? ' · current' : ' · upcoming'}</summary>
+          <div class="skill-checklist">
+            ${skillsFor(s.key, grade).map(skill => {
+              const stats = skillStatsFor(pr, s.key, grade, skill);
+              const acc = skillAccuracy(pr, s.key, grade, skill);
+              const mastered = stats.attempts >= 5 && acc >= 95;
+              return `<div class="skill-check ${mastered ? 'mastered' : ''}">
+                <div class="skill-meta"><span>${mastered ? '✅' : '⬜'} ${escapeHtml(skill)}</span><span>${acc}%</span></div>
+                <div class="skill-progress">${stats.correct}/${stats.attempts} correct · ${mastered ? 'Mastered' : `${Math.max(0, 5 - stats.attempts)} more attempts needed`}</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </details>`).join('')}
+      </div>`;
+    }).join('')}
 
     ${weakest ? `<div class="card" style="margin-top:18px; background:#FFF6DA;"><strong>Suggested focus:</strong> ${weakest.name} could use a little more practice right now.</div>` : ''}
 
@@ -1558,6 +1716,33 @@ function renderDashboard(){
       }).join('')}
     </div>
     ${renderBottomTabs('dashboard')}
+  </div>`;
+}
+
+// ===================================================================
+// SCREEN: MISTAKE TRAINING
+// ===================================================================
+function renderMistakes(){
+  const pr = state.progress;
+  const mistakes = pr.mistakes || [];
+  return `<div class="screen">
+    ${renderTopbar()}
+    <h2>Mistake Training</h2>
+    <p class="muted">Practise the same skills and question styles that have been tricky for you.</p>
+    ${mistakes.length ? `<div class="mistake-list">
+      ${mistakes.slice(0, 12).map(m => {
+        const wrongStreak = pr.skillWrongStreak[skillKey(m.strand, m.grade, m.skill)] || 0;
+        return `<div class="mistake-item">
+          <div class="mistake-question">${escapeHtml(m.skill)} · ${escapeHtml(m.prompt)}</div>
+          <div class="mistake-detail">${escapeHtml(m.strandName)} · Your answer: ${escapeHtml(m.selected)} · Correct: ${escapeHtml(m.correct)}</div>
+          <div class="mistake-detail"><strong>How to solve it:</strong> ${escapeHtml(m.explanation)}</div>
+          ${wrongStreak >= 5 ? `<div class="mistake-detail" style="color:var(--red-deep); font-weight:800; margin-top:8px;">Needs a concept refresh</div>` : ''}
+        </div>`;
+      }).join('')}
+    </div>
+    <button class="btn btn-coral btn-block" style="margin-top:14px;" data-action="start-training">🎯 Practise my mistakes</button>`
+    : `<div class="info-banner"><span class="ii">✨</span><span>Your mistake notebook is empty. Missed answers will appear here with guided tips.</span></div>`}
+    ${renderBottomTabs('mistakes')}
   </div>`;
 }
 
@@ -1725,7 +1910,7 @@ async function continueProfile(id){
   const found = state.profiles.find(p => p.id === id);
   if (!found) return;
   state.profile = found;
-  state.progress = found.progress || freshProgress();
+  state.progress = ensureProgressShape(found.progress || freshProgress());
   if (found.gradeLevel == null){
     state.draftGrade = null;
     state.screen = 'grade';
@@ -1746,6 +1931,7 @@ function goTab(key){
   if (key === 'map') goMap();
   else if (key === 'quests') goQuests();
   else if (key === 'dashboard') goDashboard();
+  else if (key === 'mistakes') goMistakes();
   else if (key === 'profile') goProfileTab();
 }
 
@@ -1753,11 +1939,29 @@ function goTab(key){
 // QUEST / ADAPTIVE ENGINE  (Duolingo-style: select → check → continue)
 // ===================================================================
 function drawQuestion(key){
-  state.currentQuestion = strandByKey(key).gens[state.progress.strandGrade[key]]();
+  const grade = state.progress.strandGrade[key];
+  const targetSkill = state.lesson && state.lesson.trainingSkill;
+  if (state.lesson && state.lesson.training && targetSkill && state.lesson.index === 0){
+    const exact = (state.progress.mistakes || []).find(m => m.strand === key && m.grade === grade && m.skill === targetSkill && m.question);
+    if (exact) {
+      state.currentQuestion = {...exact.question, skill:targetSkill, grade};
+      return;
+    }
+  }
+  let question = strandByKey(key).gens[grade]();
+  let questionSkill = question.skill || inferSkill(key, grade, question.prompt);
+  if (targetSkill){
+    for (let tries = 0; tries < 30 && questionSkill !== targetSkill; tries++) {
+      question = strandByKey(key).gens[grade]();
+      questionSkill = question.skill || inferSkill(key, grade, question.prompt);
+    }
+  }
+  state.currentQuestion = {...question, skill:questionSkill, grade};
 }
 
 function enterStrand(key, training){
-  state.lesson = { strand:key, index:0, total:LESSON_LENGTH, hearts:HEARTS_MAX, correctCount:0, xpEarned:0, gemsEarned:0, training:!!training };
+  const firstMistake = training ? (state.progress.mistakes || []).find(m => m.strand === key) : null;
+  state.lesson = { strand:key, index:0, total:LESSON_LENGTH, hearts:HEARTS_MAX, correctCount:0, xpEarned:0, gemsEarned:0, training:!!training, trainingSkill:firstMistake ? firstMistake.skill : null };
   state.phase = 'selecting';
   state.selectedChoice = null;
   drawQuestion(key);
@@ -1779,6 +1983,10 @@ async function checkAnswer(){
   const pr = state.progress;
   const q = state.currentQuestion;
   const correct = state.selectedChoice === q.correctIndex;
+  const grade = q.grade || pr.strandGrade[key];
+  const skill = q.skill || inferSkill(key, grade, q.prompt);
+  const stats = skillStatsFor(pr, key, grade, skill);
+  stats.attempts++;
 
   les.index++;
   pr.totalAnswered++;
@@ -1787,40 +1995,40 @@ async function checkAnswer(){
   if (correct){
     les.correctCount++;
     pr.totalCorrect++;
+    stats.correct++;
+    pr.skillWrongStreak[skillKey(key, grade, skill)] = 0;
     pr.strandCorrect[key] = (pr.strandCorrect[key]||0) + 1;
     pr.currentStreak++;
     pr.bestStreak = Math.max(pr.bestStreak, pr.currentStreak);
     pr.xp += 10; les.xpEarned += 10;
     pr.coins += 1; les.gemsEarned += 1;
-    pr.strandStreakUp[key]++;
+    pr.strandStreakUp[key] = 0;
     pr.strandStreakDown[key] = 0;
-
-    if (pr.strandStreakUp[key] >= LEVEL_UP_STREAK){
-      const oldGrade = pr.strandGrade[key];
-      if (oldGrade < 9){
-        pr.strandGrade[key] = oldGrade + 1;
-        pr.xp += 25; les.xpEarned += 25;
-        pr.coins += 5; les.gemsEarned += 5;
-        setTimeout(() => showToast(`🎉 Leveled up! ${strandByKey(key).name}: ${gradeLabel(pr.strandGrade[key])}`), 300);
-      }
-      pr.strandStreakUp[key] = 0;
+    if (pr.currentStreak >= 5 && pr.currentStreak % 5 === 0) setTimeout(() => showStreakCelebration(pr.currentStreak), 50);
+    if (gradeMastered(pr, key, grade) && pr.strandGrade[key] === grade && grade < 9){
+      pr.strandGrade[key] = grade + 1;
+      pr.xp += 25; les.xpEarned += 25;
+      pr.coins += 5; les.gemsEarned += 5;
+      setTimeout(() => showToast(`🎉 ${strandByKey(key).name} unlocked ${gradeLabel(pr.strandGrade[key])}!`), 300);
     }
   } else {
     pr.mistakes = pr.mistakes || [];
     pr.mistakes.unshift({
       prompt:q.prompt, selected:q.choices[state.selectedChoice], correct:q.choices[q.correctIndex],
-      explanation:q.explanation, strand:key, strandName:strandByKey(key).name, createdAt:Date.now()
+      explanation:q.explanation, strand:key, strandName:strandByKey(key).name, grade, skill,
+      question:{prompt:q.prompt, choices:q.choices, correctIndex:q.correctIndex, explanation:q.explanation}, createdAt:Date.now()
     });
     pr.mistakes = pr.mistakes.slice(0, 20);
+    const mistakeKey = skillKey(key, grade, skill);
+    pr.skillWrongStreak[mistakeKey] = (pr.skillWrongStreak[mistakeKey] || 0) + 1;
+    if (pr.skillWrongStreak[mistakeKey] >= 5){
+      state.refreshTopic = {key, grade, skill, explanation:q.explanation};
+      les.pendingRefresh = true;
+    }
     pr.currentStreak = 0;
     pr.strandStreakDown[key]++;
     pr.strandStreakUp[key] = 0;
     les.hearts--;
-    if (pr.strandStreakDown[key] >= LEVEL_DOWN_MISSES){
-      const oldGrade = pr.strandGrade[key];
-      if (oldGrade > 5) pr.strandGrade[key] = oldGrade - 1;
-      pr.strandStreakDown[key] = 0;
-    }
   }
 
   const newlyEarned = BADGES.filter(b => !pr.badges.includes(b.id) && b.check(pr));
@@ -1840,6 +2048,12 @@ async function checkAnswer(){
 
 function continueLesson(){
   const les = state.lesson;
+  if (les.pendingRefresh){
+    les.pendingRefresh = false;
+    state.screen = 'refresh';
+    render();
+    return;
+  }
   if (les.hearts <= 0 || les.index >= les.total){
     state.screen = 'lesson-complete';
     render();
@@ -1862,11 +2076,20 @@ async function resetProgress(){
 
 function goMap(){ state.screen = 'map'; render(); }
 function goDashboard(){ state.screen = 'dashboard'; render(); }
+function goMistakes(){ state.screen = 'mistakes'; render(); }
 
 function startTraining(){
   const mistakes = state.progress.mistakes || [];
   const focus = mistakes.length ? mistakes[0].strand : STRANDS[0].key;
   enterStrand(focus, true);
+}
+
+function startRefresh(){
+  enterStrand(state.refreshTopic.key, true);
+  state.lesson.trainingSkill = state.refreshTopic.skill;
+  state.lesson.index = 0;
+  drawQuestion(state.refreshTopic.key);
+  render();
 }
 
 // ===================================================================
@@ -1893,9 +2116,11 @@ app.addEventListener('click', (e) => {
   else if (action === 'select-choice') selectChoice(parseInt(el.dataset.idx,10));
   else if (action === 'check-answer') checkAnswer();
   else if (action === 'continue-lesson') continueLesson();
+  else if (action === 'start-refresh') startRefresh();
   else if (action === 'quit-lesson') quitLesson();
   else if (action === 'go-map') goMap();
   else if (action === 'go-dashboard') goDashboard();
+  else if (action === 'go-mistakes') goMistakes();
   else if (action === 'go-tab') goTab(el.dataset.screen);
   else if (action === 'start-training') startTraining();
   else if (action === 'switch-profile') switchProfile();
