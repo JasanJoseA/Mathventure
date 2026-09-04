@@ -39,7 +39,7 @@
   --font-body:'Nunito', system-ui, sans-serif;
 }
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
+html,body{margin:0;padding:0;min-height:100%;}
 body{
   font-family:var(--font-body);
   color:var(--ink);
@@ -47,6 +47,7 @@ body{
   background-image:linear-gradient(135deg, rgba(71,199,165,.08) 25%, transparent 25%), linear-gradient(315deg, rgba(53,183,216,.06) 25%, transparent 25%);
   background-size:38px 38px;
   min-height:100vh;
+  min-height:100dvh;
   overflow-x:hidden;
 }
 h1,h2,h3,h4,.display{font-family:var(--font-display); margin:0; color:var(--ink); font-weight:700;}
@@ -56,7 +57,7 @@ button{font-family:var(--font-body); cursor:pointer;}
 :focus-visible{outline:3px solid var(--blue); outline-offset:2px;}
 @media (prefers-reduced-motion: reduce){ *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;} }
 
-#app{width:100%; margin:0 auto; padding:clamp(18px,3vw,34px) clamp(18px,4vw,64px) 116px; min-height:100vh; position:relative;}
+#app{width:100%; margin:0 auto; padding:clamp(18px,3vw,34px) clamp(18px,4vw,64px) max(116px, calc(88px + env(safe-area-inset-bottom))); min-height:100vh; min-height:100dvh; position:relative;}
 
 /* ---------- Buttons: Duolingo-style chunky 3D press ---------- */
 .btn{
@@ -122,7 +123,7 @@ button{font-family:var(--font-body); cursor:pointer;}
 .avatar-accessory{position:absolute; top:-22%; left:50%; transform:translateX(-50%); line-height:1; filter:drop-shadow(0 2px 1px rgba(0,0,0,0.15)); pointer-events:none;}
 
 /* ---------- Screen fade ---------- */
-.screen{animation:fadeUp .3s ease both;}
+.screen{min-height:calc(100dvh - 150px); animation:fadeUp .3s ease both;}
 @keyframes fadeUp{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
 @keyframes popIn{ 0%{transform:scale(.6); opacity:0;} 70%{transform:scale(1.08);} 100%{transform:scale(1); opacity:1;} }
 @keyframes shake{ 10%,90%{transform:translateX(-2px);} 20%,80%{transform:translateX(3px);} 30%,50%,70%{transform:translateX(-5px);} 40%,60%{transform:translateX(5px);} }
