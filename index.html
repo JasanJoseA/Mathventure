@@ -316,6 +316,14 @@ input[type=text]:focus{border-color:var(--blue);}
 .focus-chip{display:inline-flex; align-items:center; gap:6px; background:#DDF7EF; color:var(--green-deep); border-radius:999px; padding:5px 10px; font-size:.75rem; font-weight:800; margin-top:10px;}
 .calm-control{display:flex; align-items:center; justify-content:flex-end; gap:8px; margin:0 0 12px;}
 .calm-control .btn{font-size:.75rem; padding:8px 12px;}
+.market-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-top:18px;}
+.market-card{display:flex; flex-direction:column; gap:10px; min-height:220px;}
+.market-icon{font-size:2.4rem; line-height:1;}
+.market-card h3{font-size:1.2rem;}
+.market-card .market-description{color:var(--ink-soft); font-size:.84rem; font-weight:700; flex:1;}
+.market-price{display:flex; align-items:center; justify-content:space-between; gap:8px; font-family:var(--font-display); font-weight:800; color:var(--gold-deep);}
+.market-owned{color:var(--green-deep); font-size:.8rem;}
+.market-result{margin-top:18px; background:var(--sun-soft); border-color:#F0D58B; text-align:center;}
 @media (max-width:560px){ .grade-choice-row{grid-template-columns:repeat(3,1fr);} }
 @media (max-width:720px){
   .training-launch{grid-template-columns:1fr;}
@@ -1190,6 +1198,7 @@ const TABS = [
   { key:'quests', label:'Quests', icon:'🎯' },
   { key:'dashboard', label:'Progress', icon:'📊' },
   { key:'mistakes', label:'Training', icon:'🎯' },
+  { key:'market', label:'Market', icon:'🛍️' },
   { key:'profile', label:'Profile', icon:'👤' },
 ];
 function renderBottomTabs(active){
@@ -1207,7 +1216,8 @@ function freshProgress(){
     xp:0, coins:0, totalAnswered:0, totalCorrect:0,
     currentStreak:0, bestStreak:0,
     strandGrade, strandStreakUp, strandStreakDown, strandAnswered, strandCorrect,
-    skillStats:{}, skillWrongStreak:{}, badges:[], questsCompleted:[], mistakes:[]
+    skillStats:{}, skillWrongStreak:{}, badges:[], questsCompleted:[], mistakes:[],
+    ownedAccessories:[], xpBoosts:0, coinBoosts:0, streakFreezes:0, lastLootboxReward:null
   };
 }
 
@@ -1217,6 +1227,10 @@ function ensureProgressShape(progress){
   result.mistakes = result.mistakes || [];
   result.skillStats = result.skillStats || {};
   result.skillWrongStreak = result.skillWrongStreak || {};
+  result.ownedAccessories = result.ownedAccessories || [];
+  result.xpBoosts = result.xpBoosts || 0;
+  result.coinBoosts = result.coinBoosts || 0;
+  result.streakFreezes = result.streakFreezes || 0;
   STRANDS.forEach(s => {
     result.strandGrade[s.key] = result.strandGrade[s.key] || 5;
     result.strandAnswered[s.key] = result.strandAnswered[s.key] || 0;
@@ -1310,6 +1324,7 @@ function render(){
   else if (state.screen === 'dashboard') app.innerHTML = renderDashboard();
   else if (state.screen === 'quests') app.innerHTML = renderQuests();
   else if (state.screen === 'mistakes') app.innerHTML = renderMistakes();
+    else if (state.screen === 'market') app.innerHTML = renderMarketplace();
   else if (state.screen === 'profile') app.innerHTML = renderProfileScreen();
   attachHandlers();
 }
@@ -1811,6 +1826,72 @@ function renderMistakes(){
   </div>`;
 }
 
+const MARKET_ACCESSORIES = [
+  {id:'🎩', name:'Top Hat', price:8}, {id:'👑', name:'Tiny Crown', price:18},
+  {id:'🕶️', name:'Cool Shades', price:12}, {id:'🎧', name:'Focus Headphones', price:15},
+  {id:'⭐', name:'Star Pin', price:10}, {id:'🌟', name:'Super Star', price:20},
+  {id:'🔥', name:'Flame Badge', price:14}, {id:'🦋', name:'Butterfly Clip', price:11}
+];
+const MARKET_ITEMS = [
+  {id:'xp-boost', icon:'⚡', name:'2x XP Boost', description:'Double XP from your next five correct answers.', price:20},
+  {id:'coin-boost', icon:'💎', name:'Coin Boost', description:'Earn two coins instead of one for your next five correct answers.', price:18},
+  {id:'streak-freeze', icon:'🧊', name:'Streak Freeze', description:'Protect your current streak from one wrong answer.', price:16},
+  {id:'lootbox', icon:'🎁', name:'Mystery Lootbox', description:'Open a surprise reward: boosts, a freeze, coins, or an accessory.', price:25}
+];
+function renderMarketplace(){
+  const pr = state.progress;
+  const accessories = MARKET_ACCESSORIES.filter(item => !pr.ownedAccessories.includes(item.id));
+  return `<div class="screen">
+    ${renderTopbar()}
+    <div class="row-between"><div><h2>Marketplace</h2><p class="muted">Spend coins on style, helpful boosts, and surprise rewards.</p></div><span class="pill pill-gems">💎 ${pr.coins} coins</span></div>
+    <div class="info-banner"><span class="ii">🛍️</span><span>Boosts are stored until you use them. Accessories unlock instantly and equip on your avatar.</span></div>
+    <div class="market-grid">
+      ${MARKET_ITEMS.map(item => {
+        const owned = item.id === 'xp-boost' ? `${pr.xpBoosts} ready` : item.id === 'coin-boost' ? `${pr.coinBoosts} ready` : item.id === 'streak-freeze' ? `${pr.streakFreezes} ready` : '';
+        return `<div class="card market-card"><div class="market-icon">${item.icon}</div><h3>${item.name}</h3><div class="market-description">${item.description}</div><div class="market-price"><span>${owned ? `<span class="market-owned">${owned}</span>` : `${item.price} 💎`}</span><button class="btn btn-gold btn-sm" data-action="buy-market-item" data-item="${item.id}">${item.price} 💎 Buy</button></div></div>`;
+      }).join('')}
+      ${accessories.map(item => `<div class="card market-card"><div class="market-icon">${item.id}</div><h3>${item.name}</h3><div class="market-description">A new look for your Mathventure avatar.</div><div class="market-price"><span>${item.price} 💎</span><button class="btn btn-purple btn-sm" data-action="buy-accessory" data-accessory="${item.id}">Unlock</button></div></div>`).join('')}
+    </div>
+    ${pr.lastLootboxReward ? `<div class="card market-result"><strong>Latest lootbox reward</strong><div style="font-size:1.1rem; margin-top:6px;">${escapeHtml(pr.lastLootboxReward)}</div></div>` : ''}
+    ${renderBottomTabs('market')}
+  </div>`;
+}
+
+async function buyAccessory(id){
+  const item = MARKET_ACCESSORIES.find(accessory => accessory.id === id);
+  const pr = state.progress;
+  if (!item || pr.ownedAccessories.includes(id)) return;
+  if (pr.coins < item.price) return showToast('You need more coins for that item.');
+  pr.coins -= item.price;
+  pr.ownedAccessories.push(id);
+  state.profile.avatarAccessory = id;
+  await saveProfile(); await saveProgress();
+  showToast(`${item.name} equipped!`); render();
+}
+async function buyMarketItem(id){
+  const item = MARKET_ITEMS.find(marketItem => marketItem.id === id);
+  const pr = state.progress;
+  if (!item) return;
+  if (pr.coins < item.price) return showToast('You need more coins for that item.');
+  pr.coins -= item.price;
+  if (id === 'xp-boost') pr.xpBoosts++;
+  else if (id === 'coin-boost') pr.coinBoosts++;
+  else if (id === 'streak-freeze') pr.streakFreezes++;
+  else if (id === 'lootbox') openLootbox();
+  await saveProgress();
+  showToast(id === 'lootbox' ? `Lootbox opened: ${pr.lastLootboxReward}` : `${item.name} added to your inventory.`);
+  render();
+}
+function openLootbox(){
+  const pr = state.progress;
+  const available = MARKET_ACCESSORIES.filter(item => !pr.ownedAccessories.includes(item.id));
+  const rewards = [{label:'2x XP Boost', apply:() => pr.xpBoosts++}, {label:'Coin Boost', apply:() => pr.coinBoosts++}, {label:'Streak Freeze', apply:() => pr.streakFreezes++}, {label:'10 bonus coins', apply:() => pr.coins += 10}];
+  if (available.length) rewards.push({label:available[0].name, apply:() => { pr.ownedAccessories.push(available[0].id); state.profile.avatarAccessory = available[0].id; }});
+  const reward = pick(rewards);
+  reward.apply();
+  pr.lastLootboxReward = `${reward.label} ${reward.label === '10 bonus coins' ? '💎' : '✨'}`;
+}
+
 // ===================================================================
 // SCREEN: QUESTS — ongoing challenges (separate from one-time badges)
 // ===================================================================
@@ -1997,6 +2078,7 @@ function goTab(key){
   else if (key === 'quests') goQuests();
   else if (key === 'dashboard') goDashboard();
   else if (key === 'mistakes') goMistakes();
+  else if (key === 'market') goMarketplace();
   else if (key === 'profile') goProfileTab();
 }
 
@@ -2065,8 +2147,12 @@ async function checkAnswer(){
     pr.strandCorrect[key] = (pr.strandCorrect[key]||0) + 1;
     pr.currentStreak++;
     pr.bestStreak = Math.max(pr.bestStreak, pr.currentStreak);
-    pr.xp += 10; les.xpEarned += 10;
-    pr.coins += 1; les.gemsEarned += 1;
+    const xpReward = pr.xpBoosts > 0 ? 20 : 10;
+    const coinReward = pr.coinBoosts > 0 ? 2 : 1;
+    if (pr.xpBoosts > 0) pr.xpBoosts--;
+    if (pr.coinBoosts > 0) pr.coinBoosts--;
+    pr.xp += xpReward; les.xpEarned += xpReward;
+    pr.coins += coinReward; les.gemsEarned += coinReward;
     pr.strandStreakUp[key] = 0;
     pr.strandStreakDown[key] = 0;
     if (pr.currentStreak >= 5 && pr.currentStreak % 5 === 0) setTimeout(() => showStreakCelebration(pr.currentStreak), 50);
@@ -2090,7 +2176,12 @@ async function checkAnswer(){
       state.refreshTopic = {key, grade, skill, explanation:q.explanation};
       les.pendingRefresh = true;
     }
-    pr.currentStreak = 0;
+    if (pr.currentStreak > 0 && pr.streakFreezes > 0){
+      pr.streakFreezes--;
+      showToast('Streak Freeze saved your run!');
+    } else {
+      pr.currentStreak = 0;
+    }
     pr.strandStreakDown[key]++;
     pr.strandStreakUp[key] = 0;
     les.hearts--;
@@ -2143,6 +2234,7 @@ async function resetProgress(){
 function goMap(){ state.screen = 'map'; render(); }
 function goDashboard(){ state.screen = 'dashboard'; render(); }
 function goMistakes(){ state.screen = 'mistakes'; render(); }
+function goMarketplace(){ state.screen = 'market'; render(); }
 
 function startTraining(){
   const mistakes = state.progress.mistakes || [];
@@ -2199,6 +2291,8 @@ app.addEventListener('click', (e) => {
   else if (action === 'start-training') startTraining();
   else if (action === 'start-focus-training') startFocusTraining();
   else if (action === 'toggle-calm-music') toggleCalmMusic();
+  else if (action === 'buy-market-item') buyMarketItem(el.dataset.item);
+  else if (action === 'buy-accessory') buyAccessory(el.dataset.accessory);
   else if (action === 'switch-profile') switchProfile();
   else if (action === 'reset-progress') resetProgress();
 });
