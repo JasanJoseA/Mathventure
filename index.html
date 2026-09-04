@@ -284,6 +284,14 @@ input[type=text]:focus{border-color:var(--blue);}
   border-radius:16px; padding:14px 16px; margin:12px 0 4px; font-size:.88rem; font-weight:700; color:#0F5C82;
 }
 .info-banner .ii{font-size:1.2rem; flex-shrink:0;}
+.grade-choice-row{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin:18px 0;}
+.grade-choice{border:2px solid var(--line); border-bottom-width:4px; border-radius:14px; background:var(--paper); padding:14px 8px; font-family:var(--font-display); font-weight:800; font-size:1.05rem; color:var(--ink);}
+.grade-choice:hover,.grade-choice.selected{border-color:var(--green); background:#EBFAE0;}
+.mistake-list{display:flex; flex-direction:column; gap:10px; margin-top:12px;}
+.mistake-item{background:#FFF6DA; border:2px solid #F4D98A; border-radius:14px; padding:12px 14px;}
+.mistake-item .mistake-question{font-family:var(--font-display); font-weight:800;}
+.mistake-item .mistake-detail{font-size:.8rem; color:var(--ink-soft); margin-top:4px;}
+@media (max-width:560px){ .grade-choice-row{grid-template-columns:repeat(3,1fr);} }
 
 
 .section-title{font-family:var(--font-display); font-weight:800; font-size:1.3rem; margin:26px 0 4px;}
@@ -1116,7 +1124,7 @@ function freshProgress(){
     xp:0, coins:0, totalAnswered:0, totalCorrect:0,
     currentStreak:0, bestStreak:0,
     strandGrade, strandStreakUp, strandStreakDown, strandAnswered, strandCorrect,
-    badges:[], questsCompleted:[]
+    badges:[], questsCompleted:[], mistakes:[]
   };
 }
 
@@ -1124,11 +1132,12 @@ function freshProgress(){
 // APP STATE
 // ===================================================================
 const state = {
-  screen:'loading',       // loading | login | create | map | quest | lesson-complete | dashboard | quests | profile
+  screen:'loading',       // loading | login | create | grade | map | quest | lesson-complete | dashboard | quests | profile
   profiles:[],            // [{id, name, avatarBase, avatarColor, avatarAccessory}]
   profile:null,
   progress:null,
   draftAvatar:{ base:'🧑', colorIdx:0, accessory:'none', name:'' },
+  draftGrade:null,
   editingAvatar:false,    // true when avatar creator was opened to edit an existing profile
   currentQuestion:null,
   phase:'selecting',      // selecting | checked
@@ -1143,6 +1152,7 @@ function render(){
   if (state.screen === 'loading') app.innerHTML = renderLoading();
   else if (state.screen === 'login') app.innerHTML = renderLogin();
   else if (state.screen === 'create') app.innerHTML = renderCreate();
+  else if (state.screen === 'grade') app.innerHTML = renderGrade();
   else if (state.screen === 'map') app.innerHTML = renderMap();
   else if (state.screen === 'quest') app.innerHTML = renderQuest();
   else if (state.screen === 'lesson-complete') app.innerHTML = renderLessonComplete();
@@ -1297,6 +1307,27 @@ function renderCreate(){
 }
 
 // ===================================================================
+// SCREEN: GRADE SETUP
+// ===================================================================
+function renderGrade(){
+  const selected = state.draftGrade;
+  return `<div class="screen center" style="padding-top:70px;">
+    <div class="panel" style="max-width:600px; margin:0 auto;">
+      <div style="font-size:3rem;">📚</div>
+      <h2 style="margin-top:8px;">What grade are you in?</h2>
+      <p class="muted" style="margin-top:8px;">This helps us choose a comfortable starting point. You can still explore every world.</p>
+      <div class="grade-choice-row">
+        ${[5,6,7,8,9].map(g => `<button class="grade-choice ${selected === g ? 'selected' : ''}" data-action="pick-grade" data-grade="${g}">Grade ${g}</button>`).join('')}
+      </div>
+      <label for="grade-level" class="muted" style="display:block; text-align:left; font-size:.82rem;">Or enter another grade</label>
+      <input id="grade-level" type="number" min="1" max="99" placeholder="e.g. 7" value="${selected ?? ''}" style="margin-top:6px; text-align:center;">
+      ${selected !== null && selected > 9 ? `<div class="info-banner" style="text-align:left;"><span class="ii">🚀</span><span>That is above Mathventure’s current Grade 9 range. We’ll start you at the Grade 9 Challenge while you practise the available topics.</span></div>` : ''}
+      <button class="btn btn-primary btn-lg btn-block" data-action="save-grade" ${selected === null ? 'disabled' : ''}>Continue to Mathventure 🚀</button>
+    </div>
+  </div>`;
+}
+
+// ===================================================================
 // Shared: top bar (avatar / stats / nav)
 // ===================================================================
 function renderTopbar(){
@@ -1420,7 +1451,7 @@ function renderQuest(){
             <span style="font-size:1.6rem;">${isCorrect ? '✅' : '❌'}</span>
             <div>
               <div class="headline">${isCorrect ? 'Nicely done!' : "Not quite"}</div>
-              <div class="sub">${q.explanation}</div>
+              <div class="sub"><strong>How to solve it:</strong> ${q.explanation} ${!isCorrect ? `The correct answer is ${q.choices[q.correctIndex]}.` : ''}</div>
             </div>
           </div>
           <button class="btn ${isCorrect ? 'btn-primary' : 'btn-coral'} btn-lg" data-action="continue-lesson">Continue</button>
@@ -1467,6 +1498,7 @@ function renderDashboard(){
   const pr = state.progress;
   const accuracy = pr.totalAnswered ? Math.round((pr.totalCorrect / pr.totalAnswered) * 100) : 0;
   const weakest = STRANDS.slice().sort((a,b) => pr.strandGrade[a.key] - pr.strandGrade[b.key])[0];
+  const mistakes = (pr.mistakes || []).slice(0, 6);
   return `<div class="screen">
     ${renderTopbar()}
     <h2>Your Progress</h2>
@@ -1499,6 +1531,18 @@ function renderDashboard(){
         </div>`;
       }).join('')}
     </div>
+
+    <div class="section-title">Mistake training</div>
+    <p class="muted" style="font-size:.85rem; margin-top:-2px;">Review the questions you missed, then practise the world that needs the most attention.</p>
+    ${mistakes.length ? `<div class="mistake-list">
+      ${mistakes.map(m => `<div class="mistake-item">
+        <div class="mistake-question">${escapeHtml(m.prompt)}</div>
+        <div class="mistake-detail">${escapeHtml(m.strandName)} · Your answer: ${escapeHtml(m.selected)} · Correct: ${escapeHtml(m.correct)}</div>
+        <div class="mistake-detail"><strong>Tip:</strong> ${escapeHtml(m.explanation)}</div>
+      </div>`).join('')}
+    </div>
+    <button class="btn btn-coral btn-block" style="margin-top:12px;" data-action="start-training">🎯 Practise my mistakes</button>`
+    : `<div class="info-banner"><span class="ii">✨</span><span>Your mistake notebook is empty. Answer a few questions and missed answers will appear here with tips.</span></div>`}
 
     ${weakest ? `<div class="card" style="margin-top:18px; background:#FFF6DA;"><strong>Suggested focus:</strong> ${weakest.name} could use a little more practice right now.</div>` : ''}
 
@@ -1582,7 +1626,8 @@ async function saveProfile(){
   await storageSet('profile:' + state.profile.id, {
     id: state.profile.id, name: state.profile.name,
     avatarBase: state.profile.avatarBase, avatarColorIdx: state.profile.avatarColorIdx,
-    avatarAccessory: state.profile.avatarAccessory, createdAt: state.profile.createdAt
+    avatarAccessory: state.profile.avatarAccessory, createdAt: state.profile.createdAt,
+    gradeLevel: state.profile.gradeLevel
   });
 }
 async function saveProgress(){
@@ -1643,9 +1688,30 @@ async function saveAvatar(){
     avatarBase: state.draftAvatar.base,
     avatarColorIdx: state.draftAvatar.colorIdx,
     avatarAccessory: state.draftAvatar.accessory,
+    gradeLevel: null,
     createdAt: Date.now()
   };
   state.progress = freshProgress();
+  await saveProfile();
+  await saveProgress();
+  state.draftGrade = null;
+  state.screen = 'grade';
+  render();
+}
+
+function pickGrade(grade){
+  state.draftGrade = grade;
+  render();
+}
+
+async function saveGrade(){
+  const input = document.getElementById('grade-level');
+  const grade = Number(input ? input.value : state.draftGrade);
+  if (!Number.isFinite(grade) || grade < 1) return;
+  state.draftGrade = Math.floor(grade);
+  state.profile.gradeLevel = state.draftGrade;
+  const startingGrade = Math.min(9, Math.max(5, state.draftGrade));
+  STRANDS.forEach(s => { state.progress.strandGrade[s.key] = startingGrade; });
   await saveProfile();
   await saveProgress();
   state.screen = 'map';
@@ -1660,7 +1726,12 @@ async function continueProfile(id){
   if (!found) return;
   state.profile = found;
   state.progress = found.progress || freshProgress();
-  state.screen = 'map';
+  if (found.gradeLevel == null){
+    state.draftGrade = null;
+    state.screen = 'grade';
+  } else {
+    state.screen = 'map';
+  }
   render();
 }
 
@@ -1685,8 +1756,8 @@ function drawQuestion(key){
   state.currentQuestion = strandByKey(key).gens[state.progress.strandGrade[key]]();
 }
 
-function enterStrand(key){
-  state.lesson = { strand:key, index:0, total:LESSON_LENGTH, hearts:HEARTS_MAX, correctCount:0, xpEarned:0, gemsEarned:0 };
+function enterStrand(key, training){
+  state.lesson = { strand:key, index:0, total:LESSON_LENGTH, hearts:HEARTS_MAX, correctCount:0, xpEarned:0, gemsEarned:0, training:!!training };
   state.phase = 'selecting';
   state.selectedChoice = null;
   drawQuestion(key);
@@ -1735,6 +1806,12 @@ async function checkAnswer(){
       pr.strandStreakUp[key] = 0;
     }
   } else {
+    pr.mistakes = pr.mistakes || [];
+    pr.mistakes.unshift({
+      prompt:q.prompt, selected:q.choices[state.selectedChoice], correct:q.choices[q.correctIndex],
+      explanation:q.explanation, strand:key, strandName:strandByKey(key).name, createdAt:Date.now()
+    });
+    pr.mistakes = pr.mistakes.slice(0, 20);
     pr.currentStreak = 0;
     pr.strandStreakDown[key]++;
     pr.strandStreakUp[key] = 0;
@@ -1786,6 +1863,12 @@ async function resetProgress(){
 function goMap(){ state.screen = 'map'; render(); }
 function goDashboard(){ state.screen = 'dashboard'; render(); }
 
+function startTraining(){
+  const mistakes = state.progress.mistakes || [];
+  const focus = mistakes.length ? mistakes[0].strand : STRANDS[0].key;
+  enterStrand(focus, true);
+}
+
 // ===================================================================
 // EVENT DELEGATION
 // ===================================================================
@@ -1804,6 +1887,8 @@ app.addEventListener('click', (e) => {
   else if (action === 'pick-color') pickColor(parseInt(el.dataset.val,10));
   else if (action === 'pick-accessory') pickAccessory(el.dataset.val);
   else if (action === 'save-avatar') saveAvatar();
+  else if (action === 'pick-grade') pickGrade(parseInt(el.dataset.grade,10));
+  else if (action === 'save-grade') saveGrade();
   else if (action === 'enter-strand') enterStrand(el.dataset.strand);
   else if (action === 'select-choice') selectChoice(parseInt(el.dataset.idx,10));
   else if (action === 'check-answer') checkAnswer();
@@ -1812,8 +1897,17 @@ app.addEventListener('click', (e) => {
   else if (action === 'go-map') goMap();
   else if (action === 'go-dashboard') goDashboard();
   else if (action === 'go-tab') goTab(el.dataset.screen);
+  else if (action === 'start-training') startTraining();
   else if (action === 'switch-profile') switchProfile();
   else if (action === 'reset-progress') resetProgress();
+});
+
+app.addEventListener('change', (e) => {
+  if (e.target.id === 'grade-level'){
+    const value = Number(e.target.value);
+    state.draftGrade = Number.isFinite(value) && value >= 1 ? Math.floor(value) : null;
+    render();
+  }
 });
 
 app.addEventListener('keydown', (e) => {
